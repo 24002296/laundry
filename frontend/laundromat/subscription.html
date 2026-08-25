@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>LaundryConnect - Laundromat Subscription</title>
+
+    <link rel="stylesheet" href="subscription.css">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+
+<body>
+
+<div class="subscription-page">
+
+    <!-- HEADER -->
+    <header class="subscription-header">
+
+        <div class="logo">
+            🧺 LaundryConnect
+        </div>
+
+        <div class="header-right">
+
+            <span class="business-label">
+                Laundromat Account
+            </span>
+
+            <button onclick="logout()" class="logout-btn">
+
+                <i class="fa-solid fa-right-from-bracket"></i>
+
+                Logout
+
+            </button>
+
+        </div>
+
+    </header>
+
+
+    <!-- WELCOME -->
+
+    <section class="welcome">
+
+        <span class="badge">
+
+            <i class="fa-solid fa-store"></i>
+
+            Business Account
+
+        </span>
+
+        <h1>
+            Choose Your Laundromat Plan
+        </h1>
+
+        <p>
+            Subscribe to LaundryConnect to manage your laundromat,
+            receive bookings and connect with students.
+        </p>
+
+    </section>
+
+
+    <!-- PLANS -->
+
+    <div class="plans">
+
+
+        <!-- STARTER -->
+
+        <div class="plan">
+
+            <div class="plan-icon">
+
+                <i class="fa-solid fa-store"></i>
+
+            </div>
+
+            <h2>
+                Starter
+            </h2>
+
+            <div class="price">
+
+                R99
+
+                <span>
+                    /month
+                </span>
+
+            </div>
+
+
+            <ul>
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Laundromat business profile
+                </li>
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Receive student bookings
+                </li>
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Manage bookings
+                </li>
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Basic notifications
+                </li>
+
+            </ul>
+
+
+            <button
+                class="plan-btn"
+                onclick="subscribe('Starter', 99)">
+
+                Subscribe
+
+            </button>
+
+        </div>
+
+
+
+        <!-- PROFESSIONAL -->
+
+        <div class="plan featured">
+
+            <div class="popular">
+                MOST POPULAR
+            </div>
+
+            <div class="plan-icon">
+
+                <i class="fa-solid fa-star"></i>
+
+            </div>
+
+            <h2>
+                Professional
+            </h2>
+
+            <div class="price">
+
+                R199
+
+                <span>
+                    /month
+                </span>
+
+            </div>
+
+
+            <ul>
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Everything in Starter
+                </li>
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Unlimited bookings
+                </li>
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Booking management
+                </li>
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Payment tracking
+                </li>
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Business reports
+                </li>
+
+            </ul>
+
+
+            <button
+                class="plan-btn"
+                onclick="subscribe('Professional', 199)">
+
+                Subscribe
+
+            </button>
+
+        </div>
+
+
+
+        <!-- PREMIUM -->
+
+        <div class="plan">
+
+            <div class="plan-icon">
+
+                <i class="fa-solid fa-crown"></i>
+
+            </div>
+
+            <h2>
+                Premium
+            </h2>
+
+            <div class="price">
+
+                R349
+
+                <span>
+                    /month
+                </span>
+
+            </div>
+
+
+            <ul>
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Everything in Professional
+                </li>
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Priority support
+                </li>
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Advanced analytics
+                </li>
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Advanced notifications
+                </li>
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Promotional features
+                </li>
+
+            </ul>
+
+
+            <button
+                class="plan-btn"
+                onclick="subscribe('Premium', 349)">
+
+                Subscribe
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+const API = "http://127.0.0.1:5000";
+
+const user =
+    JSON.parse(
+        localStorage.getItem("loggedInUser")
+    );
+
+
+/*
+========================================================
+CHECK LOGIN
+========================================================
+*/
+
+if (!user) {
+
+    alert("Please login first.");
+
+    window.location.href =
+        "../login.html";
+
+}
+
+
+/*
+========================================================
+CHECK USER ROLE
+========================================================
+*/
+
+if (
+    user &&
+    user.role !== "laundromat"
+) {
+
+    alert(
+        "This subscription page is only for laundromats."
+    );
+
+    window.location.href =
+        "../login.html";
+
+}
+
+
+/*
+========================================================
+SELECT SUBSCRIPTION
+========================================================
+*/
+
+async function subscribe(plan, amount) {
+
+    if (!user) {
+
+        alert("Please login first.");
+
+        return;
+
+    }
+
+
+    if (user.role !== "laundromat") {
+
+        alert(
+            "Only laundromats can subscribe using this page."
+        );
+
+        return;
+
+    }
+
+
+    /*
+    Store selected plan temporarily.
+    The payment page will read these values.
+    */
+
+    localStorage.setItem(
+        "laundromatPlan",
+        plan
+    );
+
+
+    localStorage.setItem(
+        "laundromatSubscriptionAmount",
+        amount
+    );
+
+
+    /*
+    Go to payment page.
+    */
+
+    window.location.href =
+        "subscription-payment.html";
+
+}
+
+
+/*
+========================================================
+LOGOUT
+========================================================
+*/
+
+function logout() {
+
+    localStorage.removeItem(
+        "loggedInUser"
+    );
+
+    localStorage.removeItem(
+        "laundromatPlan"
+    );
+
+    localStorage.removeItem(
+        "laundromatSubscriptionAmount"
+    );
+
+
+    window.location.href =
+        "../login.html";
+
+}
+
+</script>
+
+</body>
+
+</html>

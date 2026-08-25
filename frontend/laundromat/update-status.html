@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Booking Status | Campus Laundry Connect</title>
+
+    <link rel="stylesheet" href="update-status.css">
+
+    <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+<body>
+
+<div class="container">
+
+    <!-- Sidebar -->
+
+    <aside class="sidebar">
+
+        <h2>🧺 LaundryConnect</h2>
+
+        <p class="business" id="businessName">
+            Loading...
+        </p>
+
+        <ul>
+
+            <li>
+                <a href="dashboard.html">
+                    <i class="fa-solid fa-chart-line"></i>
+                    Dashboard
+                </a>
+            </li>
+
+            <li class="active">
+                <a href="bookings.html">
+                    <i class="fa-solid fa-calendar-check"></i>
+                    Bookings
+                </a>
+            </li>
+
+            <li>
+                <a href="services.html">
+                    <i class="fa-solid fa-soap"></i>
+                    Services
+                </a>
+            </li>
+
+            <li>
+                <a href="machines.html">
+                    <i class="fa-solid fa-gears"></i>
+                    Machines
+                </a>
+            </li>
+
+            <li>
+                <a href="customers.html">
+                    <i class="fa-solid fa-users"></i>
+                    Customers
+                </a>
+            </li>
+
+            <li>
+                <a href="reports.html">
+                    <i class="fa-solid fa-chart-column"></i>
+                    Reports
+                </a>
+            </li>
+
+            <li>
+                <a href="profile.html">
+                    <i class="fa-solid fa-user"></i>
+                    Business Profile
+                </a>
+            </li>
+
+            <li>
+                <a href="#" id="logoutBtn">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    Logout
+                </a>
+            </li>
+
+        </ul>
+
+    </aside>
+
+    <!-- Main -->
+
+    <main class="main">
+
+        <h1>Update Booking Status</h1>
+
+        <!-- Booking Details -->
+
+        <div class="card">
+
+            <h2>Booking Information</h2>
+
+            <div class="details">
+
+                <div><strong>Booking ID:</strong> <span id="bookingId"></span></div>
+
+                <div><strong>Student:</strong> <span id="studentName"></span></div>
+
+                <div><strong>Phone:</strong> <span id="studentPhone"></span></div>
+
+                <div><strong>Email:</strong> <span id="studentEmail"></span></div>
+
+                <div><strong>Service:</strong> <span id="service"></span></div>
+
+                <div><strong>Total Amount:</strong> <span id="amount"></span></div>
+
+                <div><strong>Pickup Date:</strong> <span id="pickupDate"></span></div>
+
+                <div><strong>Pickup Time:</strong> <span id="pickupTime"></span></div>
+
+            </div>
+
+        </div>
+
+        <!-- Update Form -->
+
+        <div class="card">
+
+            <h2>Update Order Status</h2>
+
+            <form id="statusForm">
+
+                <label>Current Status</label>
+
+                <select id="status" required>
+
+                    <option value="Pending">Pending</option>
+
+                    <option value="Confirmed">Confirmed</option>
+
+                    <option value="Processing">Processing</option>
+
+                    <option value="Washing">Washing</option>
+
+                    <option value="Drying">Drying</option>
+
+                    <option value="Ready for Pickup">Ready for Pickup</option>
+
+                    <option value="Completed">Completed</option>
+
+                    <option value="Cancelled">Cancelled</option>
+
+                </select>
+
+                <label>Estimated Completion</label>
+
+                <input
+                    type="datetime-local"
+                    id="estimatedCompletion">
+
+                <label>Staff Notes</label>
+
+                <textarea
+                    id="staffNotes"
+                    placeholder="Write notes..."></textarea>
+
+                <label>
+
+                    <input
+                        type="checkbox"
+                        id="notifyStudent"
+                        checked>
+
+                    Notify student
+
+                </label>
+
+                <div class="buttons">
+
+                    <button
+                        class="save"
+                        type="submit">
+
+                        <i class="fa-solid fa-floppy-disk"></i>
+
+                        Save Changes
+
+                    </button>
+
+                    <button
+                        type="button"
+                        class="cancel"
+                        onclick="window.location='bookings.html'">
+
+                        Cancel
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </main>
+
+</div>
+
+<script>
+
+const API_URL = "http://127.0.0.1:5000";
+
+const user = JSON.parse(
+    localStorage.getItem("loggedInUser")
+);
+
+
+// Check login
+if (!user || user.role !== "laundromat") {
+
+    alert("Please login first.");
+
+    window.location.href = "../login.html";
+
+}
+
+
+// Display business name
+document.getElementById("businessName").textContent =
+    user.business_name ||
+    (user.first_name + " " + user.last_name);
+
+
+// Get booking ID from URL
+const urlParams = new URLSearchParams(window.location.search);
+
+const bookingId = urlParams.get("id");
+
+console.log("Booking ID:", bookingId);
+
+if (!bookingId) {
+
+    alert("Booking ID is missing.");
+
+    window.location.href = "bookings.html";
+
+}
+
+
+// Load booking
+async function loadBooking() {
+
+    try {
+
+        const response = await fetch(
+            `${API_URL}/orders/${bookingId}`
+        );
+
+        console.log(
+            "Load booking status:",
+            response.status
+        );
+
+
+        const result = await response.json();
+
+        console.log(
+            "Booking result:",
+            result
+        );
+
+
+        if (!response.ok || !result.success) {
+
+            alert(
+                result.message ||
+                "Unable to load booking."
+            );
+
+            return;
+
+        }
+
+
+        // Backend returns { success, order }
+        const booking = result.order;
+
+
+        document.getElementById("bookingId").textContent =
+            booking.booking_number ||
+            booking.id;
+
+
+        document.getElementById("studentName").textContent =
+            booking.student_name ||
+            booking.student ||
+            "N/A";
+
+
+        document.getElementById("studentPhone").textContent =
+            booking.student_phone ||
+            "N/A";
+
+
+        document.getElementById("studentEmail").textContent =
+            booking.student_email ||
+            "N/A";
+
+
+        document.getElementById("service").textContent =
+            booking.service ||
+            "N/A";
+
+
+        document.getElementById("amount").textContent =
+            "R" + (booking.amount || 0);
+
+
+        document.getElementById("pickupDate").textContent =
+            booking.pickup_date ||
+            "N/A";
+
+
+        document.getElementById("pickupTime").textContent =
+            booking.pickup_time ||
+            "N/A";
+
+
+        document.getElementById("status").value =
+            booking.status ||
+            "Pending";
+
+
+        if (
+            document.getElementById("estimatedCompletion")
+        ) {
+
+            document.getElementById(
+                "estimatedCompletion"
+            ).value =
+                booking.estimated_completion || "";
+
+        }
+
+
+        if (
+            document.getElementById("staffNotes")
+        ) {
+
+            document.getElementById(
+                "staffNotes"
+            ).value =
+                booking.staff_notes || "";
+
+        }
+
+    }
+
+    catch(error) {
+
+        console.error(
+            "Load booking error:",
+            error
+        );
+
+        alert(
+            "Unable to load booking."
+        );
+
+    }
+
+}
+
+
+// Update booking
+document
+.getElementById("statusForm")
+.addEventListener("submit", async function(e) {
+
+    e.preventDefault();
+
+    try {
+
+        const response = await fetch(
+            API_URL + "/orders/" + bookingId,
+            {
+                method: "PUT",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+
+                    status:
+                        document.getElementById("status").value,
+
+                    estimated_completion:
+                        document.getElementById("estimatedCompletion").value || null,
+
+                    staff_notes:
+                        document.getElementById("staffNotes").value || null,
+
+                    notify_student:
+                        document.getElementById("notifyStudent").checked
+
+                })
+            }
+        );
+
+        // Check HTTP response FIRST
+        if (!response.ok) {
+
+            const errorText = await response.text();
+
+            console.error(
+                "Update failed:",
+                response.status,
+                errorText
+            );
+
+            throw new Error(
+                "Server returned HTTP " + response.status
+            );
+        }
+
+        const result = await response.json();
+
+        console.log("UPDATE RESPONSE:", result);
+
+        if (result.success) {
+
+            alert(
+                result.message ||
+                "Booking status updated successfully."
+            );
+
+            // Only redirect AFTER successful update
+            window.location.href = "bookings.html";
+
+            return;
+        }
+
+        // Backend responded but said it failed
+        alert(
+            result.message ||
+            "Unable to update booking."
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Update booking error:",
+            error
+        );
+
+        alert(
+            "Unable to update booking."
+        );
+
+    }
+
+});
+
+// Logout
+document
+.getElementById("logoutBtn")
+.addEventListener(
+    "click",
+    function(e) {
+
+        e.preventDefault();
+
+        localStorage.removeItem(
+            "loggedInUser"
+        );
+
+        window.location.href =
+            "../login.html";
+
+    }
+);
+
+
+// Load booking when page opens
+window.onload = function() {
+
+    loadBooking();
+
+};
+
+</script>
+</body>
+</html>

@@ -1,0 +1,521 @@
+/* =========================================
+   LAUNDRYCONNECT - LAUNDROMAT SUBSCRIPTION
+   ========================================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+    min-height: 100vh;
+    background: #eef4fb;
+    color: #1f2937;
+}
+
+/* =========================================
+   PAGE
+   ========================================= */
+
+.subscription-page {
+    min-height: 100vh;
+    padding-bottom: 60px;
+}
+
+/* =========================================
+   HEADER
+   ========================================= */
+
+.subscription-header {
+    height: 75px;
+    background: #1f2937;
+    color: white;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 6%;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
+}
+
+.logo {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+}
+
+.logout-btn {
+    border: none;
+    background: #374151;
+    color: white;
+
+    padding: 11px 18px;
+    border-radius: 8px;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: 0.25s ease;
+}
+
+.logout-btn i {
+    margin-right: 7px;
+}
+
+.logout-btn:hover {
+    background: #ef4444;
+    transform: translateY(-1px);
+}
+
+/* =========================================
+   WELCOME SECTION
+   ========================================= */
+
+.welcome {
+    text-align: center;
+    max-width: 850px;
+    margin: 55px auto 40px;
+    padding: 0 20px;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+
+    background: #dbeafe;
+    color: #2563eb;
+
+    padding: 8px 15px;
+    border-radius: 30px;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    margin-bottom: 18px;
+}
+
+.welcome h1 {
+    font-size: 38px;
+    line-height: 1.2;
+    color: #111827;
+    margin-bottom: 14px;
+}
+
+.welcome p {
+    color: #64748b;
+    font-size: 17px;
+    line-height: 1.6;
+}
+
+/* =========================================
+   PLAN CONTAINER
+   ========================================= */
+
+.plans {
+    width: 90%;
+    max-width: 1150px;
+
+    margin: 0 auto;
+
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 25px;
+
+    align-items: stretch;
+}
+
+/* =========================================
+   PLAN CARD
+   ========================================= */
+
+.plan {
+    position: relative;
+
+    background: white;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 18px;
+
+    padding: 35px 30px;
+
+    text-align: center;
+
+    box-shadow: 0 8px 25px rgba(15, 23, 42, 0.07);
+
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease,
+        border-color 0.25s ease;
+}
+
+.plan:hover {
+    transform: translateY(-7px);
+
+    box-shadow:
+        0 18px 40px rgba(15, 23, 42, 0.13);
+
+    border-color: #93c5fd;
+}
+
+/* =========================================
+   PLAN ICON
+   ========================================= */
+
+.plan-icon {
+    width: 65px;
+    height: 65px;
+
+    margin: 0 auto 18px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #eff6ff;
+    color: #2563eb;
+
+    font-size: 26px;
+}
+
+.plan h2 {
+    font-size: 23px;
+    color: #111827;
+    margin-bottom: 15px;
+}
+
+/* =========================================
+   PRICE
+   ========================================= */
+
+.price {
+    color: #2563eb;
+
+    font-size: 38px;
+    font-weight: 800;
+
+    margin-bottom: 25px;
+}
+
+.price span {
+    color: #64748b;
+
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* =========================================
+   FEATURES
+   ========================================= */
+
+.plan ul {
+    list-style: none;
+
+    text-align: left;
+
+    margin: 0 auto 30px;
+
+    max-width: 250px;
+}
+
+.plan li {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    color: #475569;
+
+    font-size: 14px;
+
+    padding: 9px 0;
+
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.plan li:last-child {
+    border-bottom: none;
+}
+
+.plan li i {
+    color: #22c55e;
+    font-size: 14px;
+}
+
+/* =========================================
+   SUBSCRIBE BUTTON
+   ========================================= */
+
+.plan-btn {
+    width: 100%;
+
+    padding: 13px 20px;
+
+    border: none;
+    border-radius: 9px;
+
+    background: #3b82f6;
+    color: white;
+
+    font-size: 15px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition: all 0.25s ease;
+}
+
+.plan-btn:hover {
+    background: #2563eb;
+
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 7px 18px rgba(37, 99, 235, 0.25);
+}
+
+.plan-btn:active {
+    transform: translateY(0);
+}
+
+/* =========================================
+   FEATURED PLAN
+   ========================================= */
+
+.plan.featured {
+    border: 2px solid #3b82f6;
+
+    transform: translateY(-10px);
+
+    box-shadow:
+        0 15px 40px rgba(59, 130, 246, 0.16);
+}
+
+.plan.featured:hover {
+    transform: translateY(-16px);
+}
+
+/* =========================================
+   MOST POPULAR LABEL
+   ========================================= */
+
+.popular {
+    position: absolute;
+
+    top: -14px;
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    background: #3b82f6;
+    color: white;
+
+    padding: 7px 18px;
+
+    border-radius: 20px;
+
+    font-size: 11px;
+    font-weight: 800;
+
+    letter-spacing: 0.6px;
+
+    white-space: nowrap;
+}
+
+/* =========================================
+   DIFFERENT PLAN COLORS
+   ========================================= */
+
+/* Basic */
+
+.plan:first-child .plan-icon {
+    background: #ecfdf5;
+    color: #16a34a;
+}
+
+.plan:first-child .price {
+    color: #16a34a;
+}
+
+.plan:first-child .plan-btn {
+    background: #16a34a;
+}
+
+.plan:first-child .plan-btn:hover {
+    background: #15803d;
+}
+
+
+/* Premium */
+
+.plan:last-child .plan-icon {
+    background: #fff7ed;
+    color: #f97316;
+}
+
+.plan:last-child .price {
+    color: #f97316;
+}
+
+.plan:last-child .plan-btn {
+    background: #f97316;
+}
+
+.plan:last-child .plan-btn:hover {
+    background: #ea580c;
+}
+
+/* =========================================
+   SECURITY / TRUST MESSAGE
+   ========================================= */
+
+.security-message {
+    width: 90%;
+    max-width: 700px;
+
+    margin: 35px auto 0;
+
+    background: white;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 12px;
+
+    padding: 15px 20px;
+
+    text-align: center;
+
+    color: #64748b;
+
+    font-size: 13px;
+}
+
+.security-message i {
+    color: #22c55e;
+    margin-right: 6px;
+}
+
+/* =========================================
+   RESPONSIVE - TABLET
+   ========================================= */
+
+@media (max-width: 950px) {
+
+    .plans {
+        grid-template-columns: 1fr 1fr;
+        max-width: 750px;
+    }
+
+    .plan.featured {
+        transform: none;
+    }
+
+    .plan.featured:hover {
+        transform: translateY(-7px);
+    }
+
+    .plan:last-child {
+        grid-column: 1 / -1;
+        max-width: 360px;
+        width: 100%;
+        margin: 0 auto;
+    }
+
+    .welcome h1 {
+        font-size: 32px;
+    }
+}
+
+/* =========================================
+   RESPONSIVE - MOBILE
+   ========================================= */
+
+@media (max-width: 650px) {
+
+    .subscription-header {
+        height: auto;
+        padding: 18px 20px;
+
+        gap: 15px;
+    }
+
+    .logo {
+        font-size: 18px;
+    }
+
+    .logout-btn {
+        padding: 9px 12px;
+        font-size: 13px;
+    }
+
+    .welcome {
+        margin-top: 40px;
+        margin-bottom: 35px;
+    }
+
+    .welcome h1 {
+        font-size: 27px;
+    }
+
+    .welcome p {
+        font-size: 15px;
+    }
+
+    .plans {
+        width: 92%;
+
+        grid-template-columns: 1fr;
+
+        gap: 25px;
+    }
+
+    .plan {
+        padding: 30px 24px;
+    }
+
+    .plan:last-child {
+        grid-column: auto;
+        max-width: none;
+    }
+
+    .plan.featured {
+        transform: none;
+    }
+
+    .plan.featured:hover {
+        transform: translateY(-7px);
+    }
+}
+
+/* =========================================
+   SMALL PHONES
+   ========================================= */
+
+@media (max-width: 400px) {
+
+    .subscription-header {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .welcome h1 {
+        font-size: 24px;
+    }
+
+    .price {
+        font-size: 34px;
+    }
+
+    .plan {
+        padding: 25px 20px;
+    }
+}

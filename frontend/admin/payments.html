@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payments | Campus Laundry Connect</title>
+
+    <link rel="stylesheet" href="payments.css">
+
+    <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+<body>
+
+<script>
+
+let user = JSON.parse(localStorage.getItem("loggedInUser"));
+
+if(!user || user.role !== "admin"){
+
+    alert("Please login first.");
+
+    window.location.href="../login.html";
+
+}
+
+</script>
+
+<div class="container">
+
+    <!-- Sidebar -->
+
+    <aside class="sidebar">
+
+        <h2>🧺 LaundryConnect</h2>
+
+        <p class="admin-title">Administrator</p>
+
+        <ul>
+
+            <li>
+                <a href="dashboard.html">
+                    <i class="fa-solid fa-gauge"></i>
+                    Dashboard
+                </a>
+            </li>
+
+            <li>
+                <a href="students.html">
+                    <i class="fa-solid fa-user-graduate"></i>
+                    Students
+                </a>
+            </li>
+
+            <li>
+                <a href="laundromats.html">
+                    <i class="fa-solid fa-store"></i>
+                    Laundromats
+                </a>
+            </li>
+
+            <li>
+                <a href="bookings.html">
+                    <i class="fa-solid fa-calendar-check"></i>
+                    Bookings
+                </a>
+            </li>
+
+            <li class="active">
+                <a href="#">
+                    <i class="fa-solid fa-credit-card"></i>
+                    Payments
+                </a>
+            </li>
+
+            <li>
+                <a href="reports.html">
+                    <i class="fa-solid fa-chart-column"></i>
+                    Reports
+                </a>
+            </li>
+
+            <li>
+                <a href="settings.html">
+                    <i class="fa-solid fa-gear"></i>
+                    Settings
+                </a>
+            </li>
+
+            <li>
+                <a href="../login.html" onclick="logout()">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    Logout
+                </a>
+            </li>
+
+        </ul>
+
+    </aside>
+
+    <!-- Main -->
+
+    <main class="main">
+
+        <header>
+
+            <div>
+
+                <h1>Payment Management</h1>
+
+                <p>Monitor all payment transactions across the platform.</p>
+
+            </div>
+
+            <button class="export-btn">
+
+                <i class="fa-solid fa-file-export"></i>
+
+                Export Payments
+
+            </button>
+
+        </header>
+
+        <!-- Statistics -->
+
+        <section class="stats">
+
+            <div class="card">
+
+                <i class="fa-solid fa-money-bill-wave"></i>
+
+                <h2 id="totalRevenue">R0</h2>
+
+                <p>Total Revenue</p>
+
+            </div>
+
+            <div class="card">
+
+                <i class="fa-solid fa-circle-check"></i>
+
+                <h2 id="successfulPayments">0</h2>
+
+                <p>Successful Payments</p>
+
+            </div>
+
+            <div class="card">
+
+                <i class="fa-solid fa-clock"></i>
+
+                <h2 id="pendingPayments">0</h2>
+
+                <p>Pending Payments</p>
+
+            </div>
+
+            <div class="card">
+
+                <i class="fa-solid fa-rotate-left"></i>
+
+                <h2 id="refundPayments">0</h2>
+
+                <p>Refunds</p>
+
+            </div>
+
+        </section>
+                <!-- Search -->
+
+        <div class="search-box">
+
+            <input
+                type="text"
+                id="searchInput"
+                placeholder="Search by transaction ID, student or laundromat..."
+                onkeyup="searchPayments()">
+
+            <button>
+
+                <i class="fa-solid fa-magnifying-glass"></i>
+
+            </button>
+
+        </div>
+
+        <!-- Payments Table -->
+
+        <section class="table-container">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>Transaction ID</th>
+                        <th>Student</th>
+                        <th>Laundromat</th>
+                        <th>Amount</th>
+                        <th>Payment Method</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Receipt</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody id="paymentsTable">
+
+                </tbody>
+
+            </table>
+
+        </section>
+
+    </main>
+
+</div>
+<script>
+
+const API_URL = "http://127.0.0.1:5000";
+
+let payments = [];
+
+
+// ============================================================
+// LOAD PAYMENTS
+// ============================================================
+
+async function loadPayments() {
+
+    try {
+
+        const response = await fetch(
+            API_URL + "/payments"
+        );
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Server returned HTTP " + response.status
+            );
+
+        }
+
+        const result = await response.json();
+
+        console.log(
+            "PAYMENTS API RESPONSE:",
+            result
+        );
+
+
+        // IMPORTANT:
+        // The Flask API returns:
+        //
+        // {
+        //     success: true,
+        //     payments: [...]
+        // }
+        //
+
+        if (!result.success) {
+
+            throw new Error(
+                result.message ||
+                "Unable to load payments."
+            );
+
+        }
+
+
+        payments = result.payments || [];
+
+
+        renderPayments(payments);
+
+        updateStatistics(payments);
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "LOAD PAYMENTS ERROR:",
+            error
+        );
+
+        alert(
+            "Unable to load payments: " +
+            error.message
+        );
+
+    }
+
+}
+
+
+// ============================================================
+// RENDER PAYMENTS
+// ============================================================
+
+function renderPayments(list) {
+
+    const table =
+        document.getElementById("paymentsTable");
+
+
+    table.innerHTML = "";
+
+
+    if (!Array.isArray(list)) {
+
+        console.error(
+            "Expected payments array but received:",
+            list
+        );
+
+        return;
+
+    }
+
+
+    if (list.length === 0) {
+
+        table.innerHTML = `
+
+            <tr>
+
+                <td colspan="8"
+                    style="
+                        text-align:center;
+                        padding:30px;
+                        color:#777;
+                    ">
+
+                    No payments found.
+
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+
+    }
+
+
+    list.forEach(payment => {
+
+        let status =
+            payment.status || "Pending";
+
+
+        let amount =
+            Number(payment.amount || 0);
+
+
+        let date = formatDate(
+            payment.payment_date
+        );
+
+
+        table.innerHTML += `
+
+            <tr>
+
+                <!-- Transaction ID -->
+
+                <td>
+
+                    <strong>
+                        ${payment.transaction_id || "-"}
+                    </strong>
+
+                </td>
+
+
+                <!-- Student -->
+
+                <td>
+
+                    ${payment.student || "-"}
+
+                </td>
+
+
+                <!-- Laundromat -->
+
+                <td>
+
+                    ${payment.laundromat || "-"}
+
+                </td>
+
+
+                <!-- Amount -->
+
+                <td>
+
+                    <strong>
+                        R${amount.toFixed(2)}
+                    </strong>
+
+                </td>
+
+
+                <!-- Payment Method -->
+
+                <td>
+
+                    ${payment.payment_method || "-"}
+
+                </td>
+
+
+                <!-- Date -->
+
+                <td>
+
+                    ${date}
+
+                </td>
+
+
+                <!-- Status -->
+
+                <td>
+
+                    <span class="
+                        payment-status
+                        ${status.toLowerCase()}
+                    ">
+
+                        ${status}
+
+                    </span>
+
+                </td>
+
+
+                <!-- Receipt -->
+
+                <td>
+
+                    <button
+                        class="receipt-btn"
+                        onclick="viewReceipt(${payment.id})">
+
+                        <i class="fa-solid fa-receipt"></i>
+
+                        Receipt
+
+                    </button>
+
+                </td>
+
+            </tr>
+
+        `;
+
+    });
+
+}
+
+
+// ============================================================
+// UPDATE STATISTICS
+// ============================================================
+
+function updateStatistics(list) {
+
+    let totalRevenue = 0;
+
+    let successful = 0;
+
+    let pending = 0;
+
+    let refunds = 0;
+
+
+    list.forEach(payment => {
+
+        let amount =
+            Number(payment.amount || 0);
+
+
+        let status =
+            String(payment.status || "")
+            .toLowerCase();
+
+
+        // Revenue
+
+        if (
+            status === "paid" ||
+            status === "successful" ||
+            status === "completed"
+        ) {
+
+            totalRevenue += amount;
+
+            successful++;
+
+        }
+
+
+        // Pending
+
+        else if (
+            status === "pending"
+        ) {
+
+            pending++;
+
+        }
+
+
+        // Refunds
+
+        else if (
+            status === "refunded" ||
+            status === "refund"
+        ) {
+
+            refunds++;
+
+        }
+
+    });
+
+
+    document.getElementById(
+        "totalRevenue"
+    ).textContent =
+        "R" + totalRevenue.toFixed(2);
+
+
+    document.getElementById(
+        "successfulPayments"
+    ).textContent =
+        successful;
+
+
+    document.getElementById(
+        "pendingPayments"
+    ).textContent =
+        pending;
+
+
+    document.getElementById(
+        "refundPayments"
+    ).textContent =
+        refunds;
+
+}
+
+
+// ============================================================
+// SEARCH PAYMENTS
+// ============================================================
+
+function searchPayments() {
+
+    const search =
+        document.getElementById(
+            "searchInput"
+        ).value
+        .toLowerCase()
+        .trim();
+
+
+    const filtered =
+        payments.filter(payment => {
+
+            return (
+
+                String(
+                    payment.transaction_id || ""
+                )
+                .toLowerCase()
+                .includes(search)
+
+
+                ||
+
+                String(
+                    payment.student || ""
+                )
+                .toLowerCase()
+                .includes(search)
+
+
+                ||
+
+                String(
+                    payment.laundromat || ""
+                )
+                .toLowerCase()
+                .includes(search)
+
+
+                ||
+
+                String(
+                    payment.payment_method || ""
+                )
+                .toLowerCase()
+                .includes(search)
+
+            );
+
+        });
+
+
+    renderPayments(filtered);
+
+}
+
+
+// ============================================================
+// VIEW RECEIPT
+// ============================================================
+
+async function viewReceipt(id) {
+
+    try {
+
+        const response = await fetch(
+            API_URL + "/payments/" + id
+        );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Payment not found."
+            );
+
+        }
+
+
+        const result =
+            await response.json();
+
+
+        if (!result.success) {
+
+            throw new Error(
+                result.message ||
+                "Unable to load payment."
+            );
+
+        }
+
+
+        const payment =
+            result.payment;
+
+
+        const amount =
+            Number(payment.amount || 0);
+
+
+        const date =
+            formatDate(
+                payment.payment_date
+            );
+
+
+        alert(
+
+            "PAYMENT RECEIPT\n" +
+            "============================\n\n" +
+
+            "Transaction ID: " +
+            (payment.transaction_id || "-") +
+            "\n\n" +
+
+            "Booking ID: " +
+            (payment.booking_id || "-") +
+            "\n\n" +
+
+            "Amount: R" +
+            amount.toFixed(2) +
+            "\n\n" +
+
+            "Payment Method: " +
+            (payment.payment_method || "-") +
+            "\n\n" +
+
+            "Payment Date: " +
+            date +
+            "\n\n" +
+
+            "Status: " +
+            (payment.status || "-")
+
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "RECEIPT ERROR:",
+            error
+        );
+
+        alert(
+            "Unable to load receipt."
+        );
+
+    }
+
+}
+
+
+// ============================================================
+// FORMAT DATE
+// ============================================================
+
+function formatDate(value) {
+
+    if (!value) {
+
+        return "-";
+
+    }
+
+
+    const date =
+        new Date(value);
+
+
+    if (isNaN(date.getTime())) {
+
+        return value;
+
+    }
+
+
+    return date.toLocaleDateString(
+        "en-ZA",
+        {
+            year: "numeric",
+            month: "short",
+            day: "numeric"
+        }
+    );
+
+}
+
+
+// ============================================================
+// EXPORT PAYMENTS
+// ============================================================
+
+function exportPayments() {
+
+    if (payments.length === 0) {
+
+        alert(
+            "There are no payments to export."
+        );
+
+        return;
+
+    }
+
+
+    const data = payments.map(payment => ({
+
+        transaction_id:
+            payment.transaction_id,
+
+        booking_number:
+            payment.booking_number,
+
+        student:
+            payment.student,
+
+        laundromat:
+            payment.laundromat,
+
+        amount:
+            payment.amount,
+
+        payment_method:
+            payment.payment_method,
+
+        payment_date:
+            payment.payment_date,
+
+        status:
+            payment.status
+
+    }));
+
+
+    const json =
+        JSON.stringify(
+            data,
+            null,
+            2
+        );
+
+
+    const blob =
+        new Blob(
+            [json],
+            {
+                type:
+                    "application/json"
+            }
+        );
+
+
+    const url =
+        URL.createObjectURL(blob);
+
+
+    const link =
+        document.createElement("a");
+
+
+    link.href = url;
+
+    link.download =
+        "laundryconnect-payments.json";
+
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    document.body.removeChild(link);
+
+
+    URL.revokeObjectURL(url);
+
+}
+
+
+// ============================================================
+// LOGOUT
+// ============================================================
+
+function logout() {
+
+    localStorage.removeItem(
+        "loggedInUser"
+    );
+
+    window.location.href =
+        "../login.html";
+
+}
+
+
+// ============================================================
+// PAGE LOAD
+// ============================================================
+
+window.addEventListener(
+    "load",
+    function() {
+
+        loadPayments();
+
+    }
+);
+
+
+// ============================================================
+// EXPORT BUTTON
+// ============================================================
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function() {
+
+        const exportButton =
+            document.querySelector(
+                ".export-btn"
+            );
+
+
+        if (exportButton) {
+
+            exportButton.addEventListener(
+                "click",
+                exportPayments
+            );
+
+        }
+
+    }
+);
+
+</script>
+
+</body>
+</html>

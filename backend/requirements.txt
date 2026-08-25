@@ -4,3 +4,5 @@ mysql-connector-python
 bcrypt
 gunicorn
 twilio
+google-auth
+requests

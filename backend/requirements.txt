@@ -1,9 +1,9 @@
 Flask
 flask-cors
-mysql-connector-python
 bcrypt
 gunicorn
 twilio
 google-auth
 requests
 python-dotenv
+psycopg2-binary

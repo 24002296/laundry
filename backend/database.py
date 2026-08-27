@@ -1,32 +1,60 @@
-import mysql.connector
-from mysql.connector import Error
+import os
+import psycopg2
+from psycopg2.extras import RealDictCursor
 
+
+# ============================================================
+# GET DATABASE CONNECTION
+# ============================================================
 
 def get_connection():
     """
-    Creates and returns a connection to MySQL.
+    Creates and returns a PostgreSQL connection.
+
+    DATABASE_URL should be configured in Render
+    Environment Variables.
     """
 
     try:
 
-        connection = mysql.connector.connect(
+        database_url = os.getenv("DATABASE_URL")
 
-            host="localhost",
-            user="root",
-            password="B@erlin#12$&",
-            database="campus_laundry_connect"
+        if not database_url:
 
+            print(
+                "Database Connection Error: "
+                "DATABASE_URL is not configured."
+            )
+
+            return None
+
+
+        connection = psycopg2.connect(
+            database_url
         )
 
-        if connection.is_connected():
-            return connection
 
-    except Error as e:
+        print(
+            "PostgreSQL connection successful."
+        )
 
-        print("Database Connection Error:", e)
 
-    return None
+        return connection
 
+
+    except Exception as error:
+
+        print(
+            "Database Connection Error:",
+            repr(error)
+        )
+
+        return None
+
+
+# ============================================================
+# EXECUTE INSERT / UPDATE / DELETE
+# ============================================================
 
 def execute_query(query, params=None):
 
@@ -37,54 +65,98 @@ def execute_query(query, params=None):
 
         connection = get_connection()
 
+        if connection is None:
+
+            return False
+
+
         cursor = connection.cursor()
 
-        cursor.execute(query, params)
+
+        cursor.execute(
+            query,
+            params
+        )
+
 
         connection.commit()
 
-        cursor.close()
-        connection.close()
 
         return True
 
-    except Exception as e:
 
-        print("DATABASE ERROR:", repr(e))
+    except Exception as error:
+
+        print(
+            "DATABASE ERROR:",
+            repr(error)
+        )
+
 
         if connection:
+
             connection.rollback()
 
-        if cursor:
-            cursor.close()
-
-        if connection:
-            connection.close()
 
         return False
+
+
+    finally:
+
+        if cursor:
+
+            cursor.close()
+
+
+        if connection:
+
+            connection.close()
+
+
+# ============================================================
+# FETCH ONE ROW
+# ============================================================
+
 def fetch_one(query, values=None):
 
     connection = get_connection()
 
     if connection is None:
+
         return None
 
-    cursor = connection.cursor(dictionary=True)
+
+    cursor = connection.cursor(
+        cursor_factory=RealDictCursor
+    )
+
 
     try:
 
         if values:
-            cursor.execute(query, values)
+
+            cursor.execute(
+                query,
+                values
+            )
+
         else:
+
             cursor.execute(query)
+
 
         return cursor.fetchone()
 
-    except Error as e:
 
-        print("Query Error:", e)
+    except Exception as error:
+
+        print(
+            "Query Error:",
+            repr(error)
+        )
 
         return None
+
 
     finally:
 
@@ -92,29 +164,50 @@ def fetch_one(query, values=None):
         connection.close()
 
 
+# ============================================================
+# FETCH MULTIPLE ROWS
+# ============================================================
+
 def fetch_all(query, values=None):
 
     connection = get_connection()
 
     if connection is None:
+
         return []
 
-    cursor = connection.cursor(dictionary=True)
+
+    cursor = connection.cursor(
+        cursor_factory=RealDictCursor
+    )
+
 
     try:
 
         if values:
-            cursor.execute(query, values)
+
+            cursor.execute(
+                query,
+                values
+            )
+
         else:
+
             cursor.execute(query)
+
 
         return cursor.fetchall()
 
-    except Error as e:
 
-        print("Query Error:", e)
+    except Exception as error:
+
+        print(
+            "Query Error:",
+            repr(error)
+        )
 
         return []
+
 
     finally:
 

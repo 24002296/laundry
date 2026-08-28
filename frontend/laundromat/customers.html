@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customers | Campus Laundry Connect</title>
+
+    <link rel="stylesheet" href="customers.css">
+
+    <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+<body>
+
+<script>
+
+let user = JSON.parse(localStorage.getItem("loggedInUser"));
+
+if(!user || user.role !== "laundromat"){
+
+    alert("Please login as a laundromat.");
+
+    window.location.href="../login.html";
+
+}
+
+</script>
+
+<div class="container">
+
+    <!-- Sidebar -->
+
+    <aside class="sidebar">
+
+        <h2>🧺 LaundryConnect</h2>
+
+        <p class="business" id="businessName"></p>
+
+        <ul>
+
+            <li><a href="dashboard.html"><i class="fa-solid fa-chart-line"></i> Dashboard</a></li>
+
+            <li><a href="bookings.html"><i class="fa-solid fa-calendar-check"></i> Bookings</a></li>
+
+            <li><a href="services.html"><i class="fa-solid fa-soap"></i> Services</a></li>
+
+            <li><a href="machines.html"><i class="fa-solid fa-gears"></i> Machines</a></li>
+
+            <li class="active"><a href="#"><i class="fa-solid fa-users"></i> Customers</a></li>
+
+            <li><a href="reports.html"><i class="fa-solid fa-chart-column"></i> Reports</a></li>
+
+            <li><a href="profile.html"><i class="fa-solid fa-user"></i> Business Profile</a></li>
+
+            <li>
+                <a href="#" onclick="logout()">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    Logout
+                </a>
+            </li>
+
+        </ul>
+
+    </aside>
+
+    <!-- Main -->
+
+    <main class="main">
+
+        <header>
+
+            <div>
+
+                <h1>Customers</h1>
+
+                <p>View and manage all registered students.</p>
+
+            </div>
+
+        </header>
+
+        <!-- Statistics -->
+
+        <section class="stats">
+
+            <div class="card">
+                <i class="fa-solid fa-users"></i>
+                <h2 id="totalCustomers">0</h2>
+                <p>Total Customers</p>
+            </div>
+
+            <div class="card">
+                <i class="fa-solid fa-user-plus"></i>
+                <h2 id="activeCustomers">0</h2>
+                <p>Active Customers</p>
+            </div>
+
+            <div class="card">
+                <i class="fa-solid fa-repeat"></i>
+                <h2 id="returningCustomers">0</h2>
+                <p>Returning Customers</p>
+            </div>
+
+            <div class="card">
+                <i class="fa-solid fa-star"></i>
+                <h2>5.0</h2>
+                <p>Average Rating</p>
+            </div>
+
+        </section>
+
+        <!-- Search -->
+
+        <div class="search-box">
+
+            <input
+                type="text"
+                id="searchInput"
+                placeholder="Search by name, student number or email..."
+                onkeyup="searchCustomers()">
+
+            <button>
+
+                <i class="fa-solid fa-magnifying-glass"></i>
+
+            </button>
+
+        </div>
+
+        <!-- Customer Table -->
+
+        <section class="table-container">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>Name</th>
+                        <th>Student No.</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Total Orders</th>
+                        <th>Status</th>
+                        <th>Action</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody id="customersTable">
+
+                </tbody>
+
+            </table>
+
+        </section>
+            </main>
+
+</div>
+
+<script>
+const API_URL = "https://laundry-ktbs.onrender.com";
+
+
+document.getElementById("businessName").textContent =
+    user.business_name || user.first_name;
+
+let students = [];
+let orders = [];
+
+window.onload = function () {
+    loadCustomers();
+};
+
+async function loadCustomers() {
+
+    try {
+
+        const studentResponse = await fetch(
+            API_URL + "/students"
+        );
+
+        const studentResult = await studentResponse.json();
+
+        console.log("Students response:", studentResult);
+
+        if (!studentResult.success) {
+
+            throw new Error(
+                studentResult.message || "Unable to load students"
+            );
+
+        }
+
+        // IMPORTANT: get the actual array
+        students = studentResult.students;
+
+
+        const orderResponse = await fetch(
+            API_URL + "/orders"
+        );
+
+        const orderResult = await orderResponse.json();
+
+        console.log("Orders response:", orderResult);
+
+        if (!orderResult.success) {
+
+            throw new Error(
+                orderResult.message || "Unable to load orders"
+            );
+
+        }
+
+        // IMPORTANT: get the actual array
+        orders = orderResult.orders;
+
+
+        calculateOrders();
+
+        displayCustomers(students);
+
+    }
+
+    catch (error) {
+
+        console.error("Customers Error:", error);
+
+        alert("Unable to load customers.");
+
+    }
+
+}
+
+function calculateOrders() {
+
+    students.forEach(student => {
+
+        student.totalOrders = orders.filter(order =>
+
+            order.student_email === student.email &&
+            order.laundromat ===
+            (user.business_name || user.first_name + " " + user.last_name)
+
+        ).length;
+
+    });
+
+}
+
+function displayCustomers(list) {
+
+    let table = document.getElementById("customersTable");
+
+    table.innerHTML = "";
+
+    let active = 0;
+    let returning = 0;
+
+    list.forEach(student => {
+
+        let orderCount = student.totalOrders || 0;
+
+        if (orderCount > 0)
+            returning++;
+
+        active++;
+
+        table.innerHTML += `
+
+        <tr>
+
+            <td>${student.first_name} ${student.last_name}</td>
+
+            <td>${student.student_number || "-"}</td>
+
+            <td>${student.email}</td>
+
+            <td>${student.phone || "-"}</td>
+
+            <td>${orderCount}</td>
+
+            <td>
+
+                <span class="active">
+                    Active
+                </span>
+
+            </td>
+
+            <td>
+
+                <button
+                    class="view"
+                    onclick="viewCustomer(${student.id})">
+
+                    View
+
+                </button>
+
+            </td>
+
+        </tr>
+
+        `;
+
+    });
+
+    document.getElementById("totalCustomers").textContent =
+        students.length;
+
+    document.getElementById("activeCustomers").textContent =
+        active;
+
+    document.getElementById("returningCustomers").textContent =
+        returning;
+
+}
+
+function searchCustomers() {
+
+    let value = document
+        .getElementById("searchInput")
+        .value
+        .toLowerCase();
+
+    let filtered = students.filter(student =>
+
+        (student.first_name + " " + student.last_name)
+        .toLowerCase()
+        .includes(value)
+
+        ||
+
+        (student.student_number || "")
+        .toLowerCase()
+        .includes(value)
+
+        ||
+
+        student.email
+        .toLowerCase()
+        .includes(value)
+
+    );
+
+    displayCustomers(filtered);
+
+}
+
+function viewCustomer(id) {
+
+    let student = students.find(s => s.id == id);
+
+    if (!student) return;
+
+    alert(
+
+        "Name: " + student.first_name + " " + student.last_name +
+
+        "\n\nStudent Number: " + (student.student_number || "-") +
+
+        "\n\nEmail: " + student.email +
+
+        "\n\nPhone: " + (student.phone || "-") +
+
+        "\n\nOrders: " + (student.totalOrders || 0)
+
+    );
+
+}
+
+function logout() {
+
+    localStorage.removeItem("loggedInUser");
+
+    window.location.href = "../login.html";
+
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,180 @@
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial, Helvetica, sans-serif;
+}
+
+body{
+background:#eef4fb;
+}
+
+.container{
+display:flex;
+}
+
+/* Sidebar */
+
+.sidebar{
+width:250px;
+height:100vh;
+background:#0066ff;
+color:white;
+position:fixed;
+padding:25px;
+}
+
+.sidebar h2{
+text-align:center;
+}
+
+.business{
+text-align:center;
+margin:10px 0 40px;
+opacity:.8;
+}
+
+.sidebar ul{
+list-style:none;
+}
+
+.sidebar li{
+margin-bottom:12px;
+border-radius:8px;
+}
+
+.sidebar a{
+display:block;
+padding:15px;
+text-decoration:none;
+color:white;
+}
+
+.sidebar li:hover,
+.sidebar .active{
+background:white;
+}
+
+.sidebar li:hover a,
+.sidebar .active a{
+color:#0066ff;
+}
+
+/* Main */
+
+.main{
+margin-left:250px;
+padding:40px;
+width:100%;
+}
+
+.main h1{
+color:#0066ff;
+margin-bottom:30px;
+}
+
+.card{
+background:white;
+padding:30px;
+border-radius:15px;
+box-shadow:0 5px 15px rgba(0,0,0,.08);
+margin-bottom:30px;
+}
+
+.card h2{
+color:#0066ff;
+margin-bottom:20px;
+}
+
+.details{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+gap:15px;
+}
+
+label{
+display:block;
+margin:20px 0 8px;
+font-weight:bold;
+}
+
+input,
+select,
+textarea{
+width:100%;
+padding:14px;
+border:1px solid #ccc;
+border-radius:8px;
+font-size:15px;
+}
+
+textarea{
+height:120px;
+resize:none;
+}
+
+input[type="checkbox"]{
+width:auto;
+margin-right:10px;
+}
+
+.buttons{
+margin-top:30px;
+display:flex;
+gap:15px;
+}
+
+.save{
+background:#0066ff;
+color:white;
+border:none;
+padding:14px 30px;
+border-radius:8px;
+cursor:pointer;
+}
+
+.save:hover{
+background:#0050cc;
+}
+
+.cancel{
+background:#dc3545;
+color:white;
+border:none;
+padding:14px 30px;
+border-radius:8px;
+cursor:pointer;
+}
+
+.cancel:hover{
+background:#bb2d3b;
+}
+
+/* Responsive */
+
+@media(max-width:900px){
+
+.container{
+flex-direction:column;
+}
+
+.sidebar{
+position:relative;
+width:100%;
+height:auto;
+}
+
+.main{
+margin-left:0;
+padding:20px;
+}
+
+.details{
+grid-template-columns:1fr;
+}
+
+.buttons{
+flex-direction:column;
+}
+
+}

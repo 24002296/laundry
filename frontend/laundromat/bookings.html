@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Bookings | Campus Laundry Connect</title>
+
+    <link rel="stylesheet" href="bookings.css">
+
+    <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+<body>
+
+<div class="container">
+
+    <!-- Sidebar -->
+
+    <aside class="sidebar">
+
+        <h2>🧺 LaundryConnect</h2>
+
+        <p class="business" id="businessName">
+            Loading...
+        </p>
+
+        <ul>
+
+            <li>
+                <a href="dashboard.html">
+                    <i class="fa-solid fa-chart-line"></i>
+                    Dashboard
+                </a>
+            </li>
+
+            <li class="active">
+                <a href="#">
+                    <i class="fa-solid fa-calendar-check"></i>
+                    Bookings
+                </a>
+            </li>
+
+            <li>
+                <a href="services.html">
+                    <i class="fa-solid fa-soap"></i>
+                    Services
+                </a>
+            </li>
+
+            <li>
+                <a href="machines.html">
+                    <i class="fa-solid fa-gears"></i>
+                    Machines
+                </a>
+            </li>
+
+            <li>
+                <a href="customers.html">
+                    <i class="fa-solid fa-users"></i>
+                    Customers
+                </a>
+            </li>
+
+            <li>
+                <a href="reports.html">
+                    <i class="fa-solid fa-chart-column"></i>
+                    Reports
+                </a>
+            </li>
+
+            <li>
+                <a href="profile.html">
+                    <i class="fa-solid fa-user"></i>
+                    Business Profile
+                </a>
+            </li>
+
+            <li>
+                <a href="#" id="logoutBtn">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    Logout
+                </a>
+            </li>
+
+        </ul>
+
+    </aside>
+
+    <!-- Main Content -->
+
+    <main class="main">
+
+        <header>
+
+            <h1>Manage Bookings</h1>
+
+            <button class="refresh-btn" id="refreshBtn">
+
+                <i class="fa-solid fa-rotate"></i>
+
+                Refresh
+
+            </button>
+
+        </header>
+
+        <!-- Statistics -->
+
+        <section class="stats">
+
+            <div class="card">
+
+                <i class="fa-solid fa-clock"></i>
+
+                <h2 id="pendingCount">0</h2>
+
+                <p>Pending</p>
+
+            </div>
+
+            <div class="card">
+
+                <i class="fa-solid fa-water"></i>
+
+                <h2 id="processingCount">0</h2>
+
+                <p>Processing</p>
+
+            </div>
+
+            <div class="card">
+
+                <i class="fa-solid fa-wind"></i>
+
+                <h2 id="dryingCount">0</h2>
+
+                <p>Drying</p>
+
+            </div>
+
+            <div class="card">
+
+                <i class="fa-solid fa-box-open"></i>
+
+                <h2 id="completedCount">0</h2>
+
+                <p>Completed</p>
+
+            </div>
+
+        </section>
+
+        <!-- Search -->
+
+        <div class="search-bar">
+
+            <input
+                type="text"
+                id="searchBooking"
+                placeholder="Search booking or student..."
+            >
+
+            <button>
+
+                <i class="fa-solid fa-magnifying-glass"></i>
+
+            </button>
+
+        </div>
+
+        <!-- Table -->
+
+        <section class="table-container">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>Booking ID</th>
+                        <th>Student</th>
+                        <th>Phone</th>
+                        <th>Service</th>
+                        <th>Pickup</th>
+                        <th>Status</th>
+                        <th>Amount</th>
+                        <th>Action</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody id="bookingsTable">
+
+                    <!-- JavaScript Loads Bookings -->
+
+                </tbody>
+
+            </table>
+
+        </section>
+
+    </main>
+
+</div>
+
+<script>
+
+const user = JSON.parse(
+    localStorage.getItem("loggedInUser")
+);
+
+console.log("Bookings - logged in user:", user);
+
+
+// ==========================================
+// CHECK LOGIN
+// ==========================================
+
+if (!user || user.role !== "laundromat") {
+
+    alert("Please login first.");
+
+    window.location.href = "../login.html";
+
+}
+
+
+// ==========================================
+// DISPLAY BUSINESS NAME
+// ==========================================
+
+document.getElementById("businessName").textContent =
+    user.business_name ||
+    (
+        user.first_name +
+        " " +
+        user.last_name
+    );
+
+
+// ==========================================
+// LOGOUT
+// ==========================================
+
+document
+    .getElementById("logoutBtn")
+    .addEventListener("click", function(e) {
+
+        e.preventDefault();
+
+        localStorage.removeItem("loggedInUser");
+
+        window.location.href = "../login.html";
+
+    });
+
+
+// ==========================================
+// BOOKINGS
+// ==========================================
+
+let myBookings = [];
+
+
+// Load bookings when page opens
+loadBookings();
+
+
+async function loadBookings() {
+
+    try {
+
+        console.log(
+            "Loading bookings for laundromat user:",
+            user.id
+        );
+
+
+        const response = await fetch(
+
+            `https://laundry-ktbs.onrender.com/orders/laundromat/user/${user.id}`
+
+        );
+
+
+        console.log(
+            "Bookings HTTP status:",
+            response.status
+        );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "HTTP " + response.status
+            );
+
+        }
+
+
+        const result = await response.json();
+
+
+        console.log(
+            "Bookings response:",
+            result
+        );
+
+
+        if (!result.success) {
+
+            alert(
+                result.message ||
+                "Unable to load bookings."
+            );
+
+            return;
+
+        }
+
+
+        myBookings = result.orders || [];
+
+
+        updateStatistics();
+
+        displayBookings(myBookings);
+
+    }
+
+    catch(error) {
+
+        console.error(
+            "Bookings error:",
+            error
+        );
+
+        alert(
+            "Unable to load bookings."
+        );
+
+    }
+
+}
+
+
+// ==========================================
+// STATISTICS
+// ==========================================
+
+function updateStatistics() {
+
+
+    // Pending
+
+    document.getElementById(
+        "pendingCount"
+    ).textContent =
+
+        myBookings.filter(
+            order =>
+                order.status === "Pending"
+        ).length;
+
+
+    // Processing
+
+    document.getElementById(
+        "processingCount"
+    ).textContent =
+
+        myBookings.filter(
+            order =>
+
+                order.status === "Confirmed" ||
+
+                order.status === "Processing" ||
+
+                order.status === "Washing"
+
+        ).length;
+
+
+    // Drying
+
+    document.getElementById(
+        "dryingCount"
+    ).textContent =
+
+        myBookings.filter(
+            order =>
+                order.status === "Drying"
+        ).length;
+
+
+    // Completed
+
+    document.getElementById(
+        "completedCount"
+    ).textContent =
+
+        myBookings.filter(
+            order =>
+                order.status === "Completed"
+        ).length;
+
+}
+
+
+// ==========================================
+// DISPLAY BOOKINGS
+// ==========================================
+
+function displayBookings(list) {
+
+
+    const table =
+        document.getElementById(
+            "bookingsTable"
+        );
+
+
+    table.innerHTML = "";
+
+
+    if (!list || list.length === 0) {
+
+        table.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="8"
+                    style="text-align:center;"
+                >
+
+                    No bookings found.
+
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+
+    }
+
+
+    list.forEach(order => {
+
+
+        let css = "pending";
+
+
+        switch(order.status) {
+
+
+            case "Confirmed":
+
+            case "Processing":
+
+            case "Washing":
+
+                css = "washing";
+
+                break;
+
+
+            case "Drying":
+
+                css = "drying";
+
+                break;
+
+
+            case "Completed":
+
+                css = "ready";
+
+                break;
+
+
+            case "Cancelled":
+
+                css = "cancelled";
+
+                break;
+
+        }
+
+
+        table.innerHTML += `
+
+            <tr>
+
+                <td>
+                    ${order.booking_number || order.id}
+                </td>
+
+
+                <td>
+                    ${order.student_name || "Unknown"}
+                </td>
+
+
+                <td>
+                    ${order.student_phone || "N/A"}
+                </td>
+
+
+                <td>
+                    ${order.service || "N/A"}
+                </td>
+
+
+                <td>
+                    ${order.pickup_time || "N/A"}
+                </td>
+
+
+                <td>
+
+                    <span class="${css}">
+
+                        ${order.status || "Pending"}
+
+                    </span>
+
+                </td>
+
+
+                <td>
+                    R${Number(
+                        order.total_price || 0
+                    ).toFixed(2)}
+                </td>
+
+
+                <td>
+
+                    <td>
+
+                        ${
+                            order.status === "Cancelled" ||
+                            order.status === "Completed"
+
+                            ?
+
+                            `<button
+                                class="update"
+                                disabled
+                                title="This booking can no longer be changed">
+
+                                Locked
+
+                            </button>`
+
+                            :
+
+                            `<button
+                                class="update"
+                                onclick="updateBooking(${order.id})">
+
+                                Update
+
+                            </button>`
+                        }
+
+                    </td>
+
+                    </button>
+
+                </td>
+
+            </tr>
+
+        `;
+
+    });
+
+}
+
+
+// ==========================================
+// SEARCH BOOKINGS
+// ==========================================
+
+document
+    .getElementById("searchBooking")
+    .addEventListener("keyup", function() {
+
+
+        const value =
+            this.value
+                .toLowerCase()
+                .trim();
+
+
+        const filtered =
+            myBookings.filter(order => {
+
+
+                const student =
+                    String(
+                        order.student_name || ""
+                    ).toLowerCase();
+
+
+                const booking =
+                    String(
+                        order.booking_number || ""
+                    ).toLowerCase();
+
+
+                return (
+
+                    student.includes(value) ||
+
+                    booking.includes(value)
+
+                );
+
+            });
+
+
+        displayBookings(filtered);
+
+    });
+
+
+// ==========================================
+// UPDATE BOOKING
+// ==========================================
+
+function updateBooking(id) {
+
+    window.location.href =
+        `update-status.html?id=${id}`;
+
+}
+
+
+// ==========================================
+// REFRESH BUTTON
+// ==========================================
+
+document
+    .getElementById("refreshBtn")
+    .addEventListener("click", function() {
+
+        loadBookings();
+
+    });
+
+</script>
+
+</body>
+</html>

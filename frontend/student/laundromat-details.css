@@ -1,0 +1,363 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+body{
+    background:#f4f7fb;
+}
+
+.container{
+    display:flex;
+}
+
+/* Sidebar */
+
+.sidebar{
+    width:250px;
+    height:100vh;
+    background:#0066ff;
+    color:white;
+    position:fixed;
+    padding:25px;
+}
+
+.sidebar h2{
+    margin-bottom:40px;
+    text-align:center;
+}
+
+.sidebar ul{
+    list-style:none;
+}
+
+.sidebar li{
+    margin-bottom:15px;
+    border-radius:8px;
+}
+
+.sidebar a{
+    display:block;
+    color:white;
+    text-decoration:none;
+    padding:15px;
+}
+
+.sidebar li:hover,
+.sidebar .active{
+    background:white;
+}
+
+.sidebar li:hover a,
+.sidebar .active a{
+    color:#0066ff;
+}
+
+/* Main */
+
+.main-content{
+    margin-left:250px;
+    width:100%;
+    padding:40px;
+}
+
+/* Hero */
+
+.hero{
+    background:white;
+    display:flex;
+    gap:30px;
+    border-radius:15px;
+    overflow:hidden;
+    box-shadow:0 8px 20px rgba(0,0,0,.08);
+    margin-bottom:40px;
+}
+
+.hero img{
+    width:420px;
+    height:300px;
+    object-fit:cover;
+}
+
+.hero-info{
+    padding:30px;
+}
+
+.hero-info h1{
+    color:#0066ff;
+    margin-bottom:20px;
+}
+
+.hero-info p{
+    margin:12px 0;
+    color:#555;
+}
+
+.hero-info i{
+    color:#0066ff;
+    width:25px;
+}
+
+.book-btn{
+    display:inline-block;
+    margin-top:25px;
+    padding:15px 30px;
+    background:#0066ff;
+    color:white;
+    text-decoration:none;
+    border-radius:8px;
+    font-weight:bold;
+}
+
+/* Sections */
+
+.section{
+    background:white;
+    padding:30px;
+    border-radius:15px;
+    margin-bottom:30px;
+    box-shadow:0 8px 20px rgba(0,0,0,.08);
+}
+
+.section h2{
+    color:#0066ff;
+    margin-bottom:20px;
+}
+
+/* Services */
+
+.services{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:20px;
+}
+
+.service-card{
+    text-align:center;
+    padding:20px;
+    background:#eef5ff;
+    border-radius:10px;
+}
+
+.service-card i{
+    font-size:35px;
+    color:#0066ff;
+    margin-bottom:15px;
+}
+
+/* Availability */
+
+.availability{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:20px;
+}
+
+.status{
+    padding:20px;
+    border-radius:10px;
+    color:white;
+    text-align:center;
+}
+
+.available{
+    background:#28a745;
+}
+
+.busy{
+    background:#ff9800;
+}
+
+/* Reviews */
+
+.review{
+    padding:20px;
+    background:#f8f9fa;
+    border-left:5px solid #0066ff;
+    border-radius:8px;
+    margin-bottom:20px;
+}
+
+.review h4{
+    margin-bottom:10px;
+}
+
+/* Responsive */
+
+@media(max-width:900px){
+
+.container{
+    flex-direction:column;
+}
+
+.sidebar{
+    position:relative;
+    width:100%;
+    height:auto;
+}
+
+.main-content{
+    margin-left:0;
+    padding:20px;
+}
+
+.hero{
+    flex-direction:column;
+}
+
+.hero img{
+    width:100%;
+}
+
+}
+/* =========================================================
+   REVIEW SECTION
+   ========================================================= */
+
+.rating-summary {
+    margin-bottom: 25px;
+}
+
+.rating-summary h3 {
+    font-size: 28px;
+    margin-bottom: 5px;
+}
+
+.rating-summary p {
+    color: #666;
+}
+
+
+/* =========================================================
+   REVIEW FORM
+   ========================================================= */
+
+.review-form {
+    background: #f7f9fc;
+    padding: 25px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+}
+
+.review-form h3 {
+    margin-bottom: 8px;
+}
+
+.review-form textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    resize: vertical;
+    margin-top: 15px;
+    font-family: inherit;
+}
+
+
+/* =========================================================
+   RATING STARS
+   ========================================================= */
+
+.rating-stars {
+    display: flex;
+    gap: 5px;
+    margin-top: 15px;
+}
+
+.rating-stars button {
+    border: none;
+    background: transparent;
+    font-size: 32px;
+    cursor: pointer;
+    color: #ccc;
+}
+
+.rating-stars button:hover,
+.rating-stars button.selected {
+    color: #f5b301;
+}
+
+
+/* =========================================================
+   SUBMIT REVIEW
+   ========================================================= */
+
+#submitReviewBtn {
+    margin-top: 15px;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    background: #0757c9;
+    color: white;
+    cursor: pointer;
+    font-size: 15px;
+}
+
+#submitReviewBtn:hover {
+    opacity: 0.9;
+}
+
+
+/* =========================================================
+   INDIVIDUAL REVIEW
+   ========================================================= */
+
+.review {
+    border-bottom: 1px solid #ddd;
+    padding: 20px 0;
+}
+
+.review h4 {
+    margin-bottom: 8px;
+}
+
+.review-stars {
+    color: #f5b301;
+    font-size: 20px;
+    margin-bottom: 8px;
+}
+
+.review p {
+    margin: 8px 0;
+}
+
+.review small {
+    color: #777;
+}
+
+.delete-review-btn {
+    margin-top: 10px;
+    padding: 8px 14px;
+
+    border: none;
+    border-radius: 6px;
+
+    background: #dc3545;
+    color: white;
+
+    cursor: pointer;
+
+    font-size: 14px;
+}
+
+.delete-review-btn:hover {
+    background: #b02a37;
+}
+
+.delete-review-btn i {
+    margin-right: 5px;
+}
+
+/* Gold rating stars */
+#rating .fa-star,
+#rating .fa-star-half-stroke {
+    color: #FFD700;
+}
+
+/* Empty stars */
+#rating .fa-regular.fa-star {
+    color: #FFD700;
+}

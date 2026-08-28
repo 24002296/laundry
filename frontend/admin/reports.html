@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>System Reports | Campus Laundry Connect</title>
+
+<link rel="stylesheet" href="reports.css">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+</head>
+
+<body>
+
+<script>
+
+let user = JSON.parse(localStorage.getItem("loggedInUser"));
+
+if(!user || user.role !== "admin"){
+
+    alert("Please login first.");
+
+    window.location.href="../login.html";
+
+}
+
+</script>
+
+<div class="container">
+
+<!-- Sidebar -->
+
+<aside class="sidebar">
+
+<h2>🧺 LaundryConnect</h2>
+
+<p class="admin-title">Administrator</p>
+
+<ul>
+
+<li>
+
+<a href="dashboard.html">
+
+<i class="fa-solid fa-gauge"></i>
+
+Dashboard
+
+</a>
+
+</li>
+
+<li>
+
+<a href="students.html">
+
+<i class="fa-solid fa-user-graduate"></i>
+
+Students
+
+</a>
+
+</li>
+
+<li>
+
+<a href="laundromats.html">
+
+<i class="fa-solid fa-store"></i>
+
+Laundromats
+
+</a>
+
+</li>
+
+<li>
+
+<a href="bookings.html">
+
+<i class="fa-solid fa-calendar-check"></i>
+
+Bookings
+
+</a>
+
+</li>
+
+<li>
+
+<a href="payments.html">
+
+<i class="fa-solid fa-credit-card"></i>
+
+Payments
+
+</a>
+
+</li>
+
+<li class="active">
+
+<a href="#">
+
+<i class="fa-solid fa-chart-column"></i>
+
+Reports
+
+</a>
+
+</li>
+
+<li>
+
+<a href="settings.html">
+
+<i class="fa-solid fa-gear"></i>
+
+Settings
+
+</a>
+
+</li>
+
+<li>
+
+<a href="../login.html" onclick="logout()">
+
+<i class="fa-solid fa-right-from-bracket"></i>
+
+Logout
+
+</a>
+
+</li>
+
+</ul>
+
+</aside>
+
+<!-- Main -->
+
+<main class="main">
+
+<header>
+
+<div>
+
+<h1>System Reports</h1>
+
+<p>View overall system performance and analytics.</p>
+
+</div>
+
+<button
+class="export-btn"
+onclick="exportReport()">
+
+<i class="fa-solid fa-file-export"></i>
+
+Export Report
+
+</button>
+
+</header>
+
+<!-- Statistics -->
+
+<section class="stats">
+
+<div class="card">
+
+<i class="fa-solid fa-money-bill-wave"></i>
+
+<h2 id="totalRevenue">R0</h2>
+
+<p>Total Revenue</p>
+
+</div>
+
+<div class="card">
+
+<i class="fa-solid fa-calendar-check"></i>
+
+<h2 id="bookingCount">0</h2>
+
+<p>Total Bookings</p>
+
+</div>
+
+<div class="card">
+
+<i class="fa-solid fa-user-graduate"></i>
+
+<h2 id="studentCount">0</h2>
+
+<p>Students</p>
+
+</div>
+
+<div class="card">
+
+<i class="fa-solid fa-store"></i>
+
+<h2 id="laundromatCount">0</h2>
+
+<p>Laundromats</p>
+
+</div>
+
+</section>
+
+<!-- Charts -->
+
+<section class="charts">
+
+<div class="chart-card">
+
+<h2>Monthly Revenue</h2>
+
+<div class="chart-placeholder"
+id="monthlyRevenue">
+
+No revenue data available
+
+</div>
+
+</div>
+
+<div class="chart-card">
+
+<h2>Monthly Bookings</h2>
+
+<div class="chart-placeholder"
+id="monthlyBookings">
+
+No booking data available
+
+</div>
+
+</div>
+
+</section>
+
+<!-- Top Laundromats -->
+
+<section class="table-card">
+
+<h2>Top Performing Laundromats</h2>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Laundromat</th>
+
+<th>Bookings</th>
+
+<th>Revenue</th>
+
+<th>Rating</th>
+
+</tr>
+
+</thead>
+
+<tbody id="laundromatReport">
+
+</tbody>
+
+</table>
+
+</section>
+
+<!-- Recent Reports -->
+
+<section class="table-card">
+
+<h2>Recent Reports</h2>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Report</th>
+
+<th>Date Generated</th>
+
+<th>Action</th>
+
+</tr>
+
+</thead>
+
+<tbody id="reportsTable">
+
+</tbody>
+
+</table>
+
+</section>
+<script>
+const API = "https://laundry-ktbs.onrender.com";
+
+let students = [];
+let laundromats = [];
+let bookings = [];
+let payments = [];
+
+async function loadReports() {
+
+    try {
+
+        console.log("Loading reports...");
+
+        // ==========================================
+        // LOAD STUDENTS
+        // ==========================================
+
+        const studentsResponse =
+            await fetch(`${API}/students`);
+
+        if (!studentsResponse.ok) {
+            throw new Error(
+                `Students API failed: ${studentsResponse.status}`
+            );
+        }
+
+        const studentsData =
+            await studentsResponse.json();
+
+        console.log("Students response:", studentsData);
+
+        students = studentsData.students || [];
+
+
+        // ==========================================
+        // LOAD LAUNDROMATS
+        // ==========================================
+
+        const laundromatsResponse =
+            await fetch(`${API}/laundromats`);
+
+        if (!laundromatsResponse.ok) {
+            throw new Error(
+                `Laundromats API failed: ${laundromatsResponse.status}`
+            );
+        }
+
+        const laundromatsData =
+            await laundromatsResponse.json();
+
+        console.log("Laundromats response:", laundromatsData);
+
+        laundromats =
+            laundromatsData.laundromats || [];
+
+
+        // ==========================================
+        // LOAD BOOKINGS
+        // ==========================================
+
+        const bookingsResponse =
+            await fetch(`${API}/bookings`);
+
+        if (!bookingsResponse.ok) {
+            throw new Error(
+                `Bookings API failed: ${bookingsResponse.status}`
+            );
+        }
+
+        const bookingsData =
+            await bookingsResponse.json();
+
+        console.log("Bookings response:", bookingsData);
+
+        bookings =
+            bookingsData.bookings || [];
+
+
+        // ==========================================
+        // LOAD PAYMENTS
+        // ==========================================
+
+        const paymentsResponse =
+            await fetch(`${API}/payments`);
+
+        if (!paymentsResponse.ok) {
+            throw new Error(
+                `Payments API failed: ${paymentsResponse.status}`
+            );
+        }
+
+        const paymentsData =
+            await paymentsResponse.json();
+
+        console.log("Payments response:", paymentsData);
+
+        payments =
+            paymentsData.payments || [];
+
+
+        // ==========================================
+        // BASIC COUNTS
+        // ==========================================
+
+        document.getElementById("studentCount").textContent =
+            students.length;
+
+        document.getElementById("laundromatCount").textContent =
+            laundromats.length;
+
+        document.getElementById("bookingCount").textContent =
+            bookings.length;
+
+
+        // ==========================================
+        // TOTAL REVENUE
+        // ==========================================
+
+        let revenue = payments.reduce(
+            (sum, payment) => {
+
+                return sum +
+                    Number(payment.amount || 0);
+
+            },
+            0
+        );
+
+        document.getElementById("totalRevenue").textContent =
+            "R" + revenue.toLocaleString(
+                "en-ZA",
+                {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }
+            );
+
+
+        // ==========================================
+        // TOP LAUNDROMATS
+        // ==========================================
+
+        loadTopLaundromats(laundromats);
+
+
+        // ==========================================
+        // RECENT REPORTS
+        // ==========================================
+
+        loadRecentReports();
+
+
+        console.log("Reports loaded successfully.");
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "LOAD REPORTS ERROR:",
+            error
+        );
+
+        alert(
+            "Unable to load reports. Check that the Flask server is running."
+        );
+
+    }
+
+}
+
+loadReports();
+
+function loadTopLaundromats(laundromats) {
+
+    let table =
+        document.getElementById("laundromatReport");
+
+    table.innerHTML = "";
+
+
+    if (!laundromats || laundromats.length === 0) {
+
+        table.innerHTML = `
+            <tr>
+                <td colspan="4">
+                    No laundromats available.
+                </td>
+            </tr>
+        `;
+
+        return;
+    }
+
+
+    // ==========================================
+    // CALCULATE BOOKING COUNTS
+    // ==========================================
+
+    let laundromatStats = laundromats.map(shop => {
+
+        let shopBookings =
+            bookings.filter(
+                booking =>
+                    booking.laundromat ===
+                    shop.business_name
+            );
+
+
+        let shopPayments =
+            payments.filter(
+                payment =>
+                    payment.laundromat ===
+                    shop.business_name
+            );
+
+
+        let revenue =
+            shopPayments.reduce(
+                (sum, payment) => {
+
+                    return sum +
+                        Number(payment.amount || 0);
+
+                },
+                0
+            );
+
+
+        return {
+
+            ...shop,
+
+            bookingCount:
+                shopBookings.length,
+
+            revenue:
+                revenue
+
+        };
+
+    });
+
+
+    // Sort by bookings
+    laundromatStats.sort(
+        (a, b) =>
+            b.bookingCount -
+            a.bookingCount
+    );
+
+
+    // ==========================================
+    // DISPLAY
+    // ==========================================
+
+    laundromatStats.forEach(shop => {
+
+        table.innerHTML += `
+
+            <tr>
+
+                <td>
+                    ${shop.business_name || "N/A"}
+                </td>
+
+                <td>
+                    ${shop.bookingCount}
+                </td>
+
+                <td>
+                    R${Number(
+                        shop.revenue || 0
+                    ).toFixed(2)}
+                </td>
+
+                <td>
+                    ⭐ ${shop.rating || "0.0"}
+                </td>
+
+            </tr>
+
+        `;
+
+    });
+
+}
+function loadRecentReports() {
+
+    let table =
+        document.getElementById("reportsTable");
+
+    if (!table) {
+        return;
+    }
+
+    table.innerHTML = "";
+
+    let today =
+        new Date().toLocaleDateString("en-ZA");
+
+
+    let reports = [
+
+        "Revenue Report",
+        "Booking Report",
+        "Student Report",
+        "Laundromat Report"
+
+    ];
+
+
+    reports.forEach(report => {
+
+        table.innerHTML += `
+
+            <tr>
+
+                <td>
+                    ${report}
+                </td>
+
+                <td>
+                    ${today}
+                </td>
+
+                <td>
+
+                    <button
+                        class="download"
+                        onclick="downloadReport('${report}')">
+
+                        <i class="fa-solid fa-download"></i>
+
+                    </button>
+
+                </td>
+
+            </tr>
+
+        `;
+
+    });
+
+}
+function downloadReport(reportName) {
+
+    let data = {};
+
+
+    if (reportName === "Revenue Report") {
+
+        data = {
+            report: "Revenue Report",
+            generated: new Date().toISOString(),
+            totalRevenue: payments.reduce(
+                (sum, payment) =>
+                    sum + Number(payment.amount || 0),
+                0
+            ),
+            payments: payments
+        };
+
+    }
+
+
+    else if (reportName === "Booking Report") {
+
+        data = {
+            report: "Booking Report",
+            generated: new Date().toISOString(),
+            totalBookings: bookings.length,
+            bookings: bookings
+        };
+
+    }
+
+
+    else if (reportName === "Student Report") {
+
+        data = {
+            report: "Student Report",
+            generated: new Date().toISOString(),
+            totalStudents: students.length,
+            students: students
+        };
+
+    }
+
+
+    else if (reportName === "Laundromat Report") {
+
+        data = {
+            report: "Laundromat Report",
+            generated: new Date().toISOString(),
+            totalLaundromats: laundromats.length,
+            laundromats: laundromats
+        };
+
+    }
+
+
+    let blob = new Blob(
+        [
+            JSON.stringify(
+                data,
+                null,
+                2
+            )
+        ],
+        {
+            type: "application/json"
+        }
+    );
+
+
+    let url =
+        URL.createObjectURL(blob);
+
+    let a =
+        document.createElement("a");
+
+    a.href = url;
+
+    a.download =
+        reportName.replace(
+            /\s+/g,
+            "_"
+        ) + ".json";
+
+    document.body.appendChild(a);
+
+    a.click();
+
+    document.body.removeChild(a);
+
+    URL.revokeObjectURL(url);
+
+}
+
+function exportReport() {
+
+    let totalRevenue =
+        payments.reduce(
+            (sum, payment) =>
+                sum + Number(payment.amount || 0),
+            0
+        );
+
+
+    let report = {
+
+        generated:
+            new Date().toISOString(),
+
+        summary: {
+
+            students:
+                students.length,
+
+            laundromats:
+                laundromats.length,
+
+            bookings:
+                bookings.length,
+
+            payments:
+                payments.length,
+
+            revenue:
+                totalRevenue
+
+        },
+
+        students:
+            students,
+
+        laundromats:
+            laundromats,
+
+        bookings:
+            bookings,
+
+        payments:
+            payments
+
+    };
+
+
+    let blob = new Blob(
+        [
+            JSON.stringify(
+                report,
+                null,
+                2
+            )
+        ],
+        {
+            type: "application/json"
+        }
+    );
+
+
+    let url =
+        URL.createObjectURL(blob);
+
+    let a =
+        document.createElement("a");
+
+    a.href = url;
+
+    a.download =
+        "CampusLaundryReport.json";
+
+    document.body.appendChild(a);
+
+    a.click();
+
+    document.body.removeChild(a);
+
+    URL.revokeObjectURL(url);
+
+}
+
+
+function logout(){
+
+    localStorage.removeItem("loggedInUser");
+
+    window.location.href="../login.html";
+
+}
+
+// Load page
+window.onload = function(){
+
+    loadReports();
+
+};
+
+</script>
+
+</main>
+
+</div>
+
+</body>
+</html>

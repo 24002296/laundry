@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Book Laundry | Campus Laundry Connect</title>
+
+<link rel="stylesheet" href="book-laundry.css">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+</head>
+
+<body>
+
+<div class="container">
+
+<!-- Sidebar -->
+
+<aside class="sidebar">
+
+<h2>🧺 LaundryConnect</h2>
+
+<ul>
+
+<li>
+<a href="dashboard.html">
+<i class="fa-solid fa-house"></i>
+Dashboard
+</a>
+</li>
+
+<li>
+<a href="laundromats.html">
+<i class="fa-solid fa-store"></i>
+Laundromats
+</a>
+</li>
+
+<li class="active">
+<a href="#">
+<i class="fa-solid fa-calendar-check"></i>
+Book Laundry
+</a>
+</li>
+
+<li>
+<a href="my-orders.html">
+<i class="fa-solid fa-box"></i>
+My Orders
+</a>
+</li>
+
+<li>
+<a href="track-order.html">
+<i class="fa-solid fa-location-dot"></i>
+Track Order
+</a>
+</li>
+
+<li>
+<a href="profile.html">
+<i class="fa-solid fa-user"></i>
+Profile
+</a>
+</li>
+
+<li>
+
+<a href="#" id="logoutBtn">
+
+<i class="fa-solid fa-right-from-bracket"></i>
+
+Logout
+
+</a>
+
+</li>
+
+</ul>
+
+</aside>
+
+<!-- Main -->
+
+<main class="main-content">
+
+<div class="booking-card">
+
+<h1>Book Laundry</h1>
+
+<p>Fill in the details below.</p>
+
+<form id="bookingForm">
+
+<div class="row">
+
+<div class="input-box">
+
+<label>Laundromat</label>
+
+<select id="laundromatSelect" required>
+
+<option value="">Select Laundromat</option>
+
+</select>
+
+</div>
+
+<div class="input-box">
+
+<label>Service</label>
+
+<select id="service" required>
+
+
+
+</select>
+
+</div>
+
+</div>
+
+<div class="row">
+
+<div class="input-box">
+
+<label>Pickup Date</label>
+
+<input
+type="date"
+id="date"
+required>
+
+</div>
+
+<div class="input-box">
+
+<label>Pickup Time</label>
+
+<input
+type="time"
+id="time"
+required>
+
+</div>
+
+</div>
+
+<div class="row">
+
+<div class="input-box">
+
+<label>Number of Loads</label>
+
+<input
+type="number"
+id="loads"
+min="1"
+value="1"
+required>
+
+</div>
+
+<div class="input-box">
+
+<label>Estimated Weight (kg)</label>
+
+<input
+type="number"
+id="weight"
+required>
+
+</div>
+
+</div>
+
+<div class="input-box">
+
+<label>Special Instructions</label>
+
+<textarea
+id="instructions"
+placeholder="Optional"></textarea>
+
+</div>
+
+<!-- Summary -->
+
+<div class="summary">
+
+<h2>Booking Summary</h2>
+
+<p>
+
+<strong>Service:</strong>
+
+<span id="summaryService">
+
+None
+
+</span>
+
+</p>
+
+<p>
+
+<strong>Loads:</strong>
+
+<span id="summaryLoads">
+
+1
+
+</span>
+
+</p>
+
+<p>
+
+<strong>Total Price:</strong>
+
+<span id="summaryPrice">
+
+R0
+
+</span>
+
+</p>
+
+</div>
+
+<button type="submit">
+
+Confirm Booking
+
+</button>
+
+</form>
+
+</div>
+
+</main>
+
+</div>
+
+<script>
+
+const API_URL = "https://laundry-ktbs.onrender.com";
+
+// ============================================================
+// GET LOGGED-IN USER
+// ============================================================
+
+const user = JSON.parse(
+    localStorage.getItem("loggedInUser")
+);
+
+if (!user || user.role !== "student") {
+
+    alert("Please login first.");
+
+    window.location.href = "../login.html";
+
+}
+
+
+// ============================================================
+// LOGOUT
+// ============================================================
+
+const logoutBtn =
+    document.getElementById("logoutBtn");
+
+if (logoutBtn) {
+
+    logoutBtn.addEventListener(
+        "click",
+        function(e) {
+
+            e.preventDefault();
+
+            localStorage.removeItem(
+                "loggedInUser"
+            );
+
+            localStorage.removeItem(
+                "pendingBooking"
+            );
+
+            localStorage.removeItem(
+                "selectedLaundromat"
+            );
+
+            window.location.href =
+                "../login.html";
+
+        }
+    );
+
+}
+
+
+// ============================================================
+// DOM ELEMENTS
+// ============================================================
+
+const laundromatSelect =
+    document.getElementById(
+        "laundromatSelect"
+    );
+
+const serviceSelect =
+    document.getElementById(
+        "service"
+    );
+
+const loadsInput =
+    document.getElementById(
+        "loads"
+    );
+
+
+// ============================================================
+// LOAD LAUNDROMATS
+// ============================================================
+
+async function loadLaundromats() {
+
+    try {
+
+        const response =
+            await fetch(
+                API_URL + "/laundromats"
+            );
+
+        if (!response.ok) {
+
+            throw new Error(
+                "HTTP " + response.status
+            );
+
+        }
+
+        const data =
+            await response.json();
+
+        laundromatSelect.innerHTML = `
+            <option value="">
+                Select Laundromat
+            </option>
+        `;
+
+        const laundromats =
+            data.laundromats || [];
+
+        if (
+            laundromats.length === 0
+        ) {
+
+            laundromatSelect.innerHTML = `
+                <option value="">
+                    No laundromats available
+                </option>
+            `;
+
+            return;
+
+        }
+
+
+        laundromats.forEach(
+            function(shop) {
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+                option.value =
+                    shop.id;
+
+                option.textContent =
+                    shop.business_name;
+
+                laundromatSelect.appendChild(
+                    option
+                );
+
+            }
+        );
+
+
+        // Restore previously selected laundromat
+
+        const selectedLaundry =
+            localStorage.getItem(
+                "selectedLaundromat"
+            );
+
+        if (selectedLaundry) {
+
+            laundromatSelect.value =
+                selectedLaundry;
+
+            loadServices(
+                selectedLaundry
+            );
+
+        }
+
+    }
+
+    catch(error) {
+
+        console.error(
+            "LAUNDROMAT ERROR:",
+            error
+        );
+
+        alert(
+            "Unable to load laundromats."
+        );
+
+    }
+
+}
+
+
+// ============================================================
+// LAUNDROMAT CHANGE
+// ============================================================
+
+laundromatSelect.addEventListener(
+    "change",
+    function() {
+
+        const laundromatId =
+            this.value;
+
+
+        serviceSelect.innerHTML = `
+            <option value="">
+                Select Service
+            </option>
+        `;
+
+
+        updateSummary();
+
+
+        if (!laundromatId) {
+
+            localStorage.removeItem(
+                "selectedLaundromat"
+            );
+
+            return;
+
+        }
+
+
+        localStorage.setItem(
+            "selectedLaundromat",
+            laundromatId
+        );
+
+
+        loadServices(
+            laundromatId
+        );
+
+    }
+);
+
+
+// ============================================================
+// LOAD SERVICES
+// ============================================================
+
+async function loadServices(
+    laundromatId
+) {
+
+    if (!serviceSelect) {
+
+        console.error(
+            "Service select not found."
+        );
+
+        return;
+
+    }
+
+
+    if (!laundromatId) {
+
+        serviceSelect.innerHTML = `
+            <option value="">
+                Select Laundromat First
+            </option>
+        `;
+
+        return;
+
+    }
+
+
+    serviceSelect.innerHTML = `
+        <option value="">
+            Loading services...
+        </option>
+    `;
+
+
+    try {
+
+        console.log(
+            "Loading services for:",
+            laundromatId
+        );
+
+
+        const response =
+            await fetch(
+                API_URL +
+                "/services/laundromat/" +
+                laundromatId
+            );
+
+
+        const data =
+            await response.json();
+
+
+        console.log(
+            "SERVICES RESPONSE:",
+            data
+        );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.message ||
+                "HTTP " +
+                response.status
+            );
+
+        }
+
+
+        serviceSelect.innerHTML = `
+            <option value="">
+                Choose Service
+            </option>
+        `;
+
+
+        const services =
+            data.services || [];
+
+
+        if (services.length === 0) {
+
+            serviceSelect.innerHTML = `
+                <option value="">
+                    No services available
+                </option>
+            `;
+
+            updateSummary();
+
+            return;
+
+        }
+
+
+        services.forEach(
+            function(service) {
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+
+                /*
+                 IMPORTANT
+
+                 The option value is now the
+                 SERVICE ID, not the price.
+                */
+
+                option.value =
+                    service.id;
+
+
+                option.dataset.serviceId =
+                    service.id;
+
+
+                option.dataset.price =
+                    service.price;
+
+
+                option.dataset.serviceName =
+                    service.name;
+
+
+                option.textContent =
+                    service.name +
+                    " - R" +
+                    Number(
+                        service.price
+                    ).toFixed(2);
+
+
+                serviceSelect.appendChild(
+                    option
+                );
+
+            }
+        );
+
+
+        updateSummary();
+
+    }
+
+    catch(error) {
+
+        console.error(
+            "SERVICES ERROR:",
+            error
+        );
+
+
+        serviceSelect.innerHTML = `
+            <option value="">
+                Unable to load services
+            </option>
+        `;
+
+    }
+
+}
+
+
+// ============================================================
+// BOOKING SUMMARY
+// ============================================================
+
+function updateSummary() {
+
+    const selectedOption =
+        serviceSelect.options[
+            serviceSelect.selectedIndex
+        ];
+
+
+    const summaryService =
+        document.getElementById(
+            "summaryService"
+        );
+
+    const summaryLoads =
+        document.getElementById(
+            "summaryLoads"
+        );
+
+    const summaryPrice =
+        document.getElementById(
+            "summaryPrice"
+        );
+
+
+    if (
+        !selectedOption ||
+        !serviceSelect.value
+    ) {
+
+        if (summaryService) {
+
+            summaryService.textContent =
+                "None";
+
+        }
+
+
+        if (summaryLoads) {
+
+            summaryLoads.textContent =
+                loadsInput.value || "1";
+
+        }
+
+
+        if (summaryPrice) {
+
+            summaryPrice.textContent =
+                "R0.00";
+
+        }
+
+
+        return;
+
+    }
+
+
+    const serviceName =
+        selectedOption.textContent;
+
+
+    const servicePrice =
+        Number(
+            selectedOption.dataset.price || 0
+        );
+
+
+    const numberOfLoads =
+        Number(
+            loadsInput.value || 1
+        );
+
+
+    const total =
+        servicePrice *
+        numberOfLoads;
+
+
+    if (summaryService) {
+
+        summaryService.textContent =
+            serviceName;
+
+    }
+
+
+    if (summaryLoads) {
+
+        summaryLoads.textContent =
+            numberOfLoads;
+
+    }
+
+
+    if (summaryPrice) {
+
+        summaryPrice.textContent =
+            "R" +
+            total.toFixed(2);
+
+    }
+
+}
+
+
+// ============================================================
+// SUMMARY EVENTS
+// ============================================================
+
+serviceSelect.addEventListener(
+    "change",
+    updateSummary
+);
+
+
+loadsInput.addEventListener(
+    "input",
+    updateSummary
+);
+
+
+// ============================================================
+// CREATE TEMPORARY BOOKING
+// ============================================================
+
+document
+.getElementById("bookingForm")
+.addEventListener(
+    "submit",
+    function(e) {
+
+        e.preventDefault();
+
+
+        const laundromatId =
+            laundromatSelect.value;
+
+
+        const selectedOption =
+            serviceSelect.options[
+                serviceSelect.selectedIndex
+            ];
+
+
+        if (!laundromatId) {
+
+            alert(
+                "Please select a laundromat."
+            );
+
+            return;
+
+        }
+
+
+        if (
+            !selectedOption ||
+            !serviceSelect.value
+        ) {
+
+            alert(
+                "Please select a service."
+            );
+
+            return;
+
+        }
+
+
+        const serviceId =
+            Number(
+                selectedOption.dataset.serviceId
+            );
+
+
+        const servicePrice =
+            Number(
+                selectedOption.dataset.price ||
+                0
+            );
+
+
+        const numberOfLoads =
+            Number(
+                loadsInput.value ||
+                1
+            );
+
+
+        if (numberOfLoads < 1) {
+
+            alert(
+                "Please enter at least 1 load."
+            );
+
+            return;
+
+        }
+
+
+        const pickupDate =
+            document.getElementById(
+                "date"
+            ).value;
+
+
+        const pickupTime =
+            document.getElementById(
+                "time"
+            ).value;
+
+
+        const weight =
+            document.getElementById(
+                "weight"
+            ).value;
+
+
+        const instructions =
+            document.getElementById(
+                "instructions"
+            ).value;
+
+
+        if (!pickupDate) {
+
+            alert(
+                "Please select a pickup date."
+            );
+
+            return;
+
+        }
+
+
+        if (!pickupTime) {
+
+            alert(
+                "Please select a pickup time."
+            );
+
+            return;
+
+        }
+
+
+        if (!weight) {
+
+            alert(
+                "Please enter the laundry weight."
+            );
+
+            return;
+
+        }
+
+
+        const totalAmount =
+            servicePrice *
+            numberOfLoads;
+
+
+        /*
+         ========================================================
+         IMPORTANT
+
+         DO NOT send POST /bookings here.
+
+         The booking is only stored temporarily in the browser.
+         It will be inserted into MySQL AFTER payment succeeds.
+         ========================================================
+        */
+
+        const pendingBooking = {
+
+            user_id:
+                Number(user.id),
+
+            laundromat_id:
+                Number(laundromatId),
+
+            service_id:
+                serviceId,
+
+            service:
+                selectedOption.dataset.serviceName ||
+                selectedOption.textContent,
+
+            pickup_date:
+                pickupDate,
+
+            pickup_time:
+                pickupTime,
+
+            loads:
+                numberOfLoads,
+
+            weight:
+                weight,
+
+            instructions:
+                instructions,
+
+            amount:
+                totalAmount
+
+        };
+
+
+        console.log(
+            "PENDING BOOKING:",
+            pendingBooking
+        );
+
+
+        /*
+         ========================================================
+         SAVE TEMPORARILY
+         ========================================================
+        */
+
+        localStorage.setItem(
+            "pendingBooking",
+            JSON.stringify(
+                pendingBooking
+            )
+        );
+
+
+        /*
+         ========================================================
+         GO TO PAYMENT
+         ========================================================
+        */
+
+        window.location.href =
+            "booking-payment.html";
+
+    }
+);
+
+
+// ============================================================
+// START
+// ============================================================
+
+loadLaundromats();
+
+</script>
+</body>
+</html>

@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Subscription Payments | Admin</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            color: #1f2937;
+        }
+
+        .header {
+            background: #111827;
+            color: white;
+            padding: 22px 35px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+        }
+
+        .back-btn {
+            color: white;
+            text-decoration: none;
+            background: #2563eb;
+            padding: 10px 18px;
+            border-radius: 7px;
+        }
+
+        .container {
+            padding: 30px;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns:
+                repeat(auto-fit, minmax(210px, 1fr));
+
+            gap: 20px;
+
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            padding: 22px;
+            border-radius: 12px;
+            box-shadow:
+                0 3px 12px rgba(0,0,0,0.08);
+        }
+
+        .card h3 {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 10px;
+        }
+
+        .card .value {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .student-card {
+            border-left: 5px solid #2563eb;
+        }
+
+        .laundromat-card {
+            border-left: 5px solid #16a34a;
+        }
+
+        .revenue-card {
+            border-left: 5px solid #f59e0b;
+        }
+
+        .total-card {
+            border-left: 5px solid #7c3aed;
+        }
+
+        .section {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+
+            box-shadow:
+                0 3px 12px rgba(0,0,0,0.08);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .section-header h2 {
+            font-size: 20px;
+        }
+
+        .filters {
+            display: flex;
+            gap: 10px;
+        }
+
+        .filters button {
+            border: none;
+            padding: 9px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            background: #e5e7eb;
+        }
+
+        .filters button.active {
+            background: #2563eb;
+            color: white;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #f3f4f6;
+            text-align: left;
+            padding: 14px;
+            font-size: 13px;
+        }
+
+        td {
+            padding: 14px;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 14px;
+        }
+
+        tr:hover {
+            background: #f9fafb;
+        }
+
+        .role {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .student {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .laundromat {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .status {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .active {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .expired {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .amount {
+            font-weight: bold;
+            color: #111827;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 30px;
+        }
+
+        .error {
+            color: #dc2626;
+            text-align: center;
+            padding: 20px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<header class="header">
+
+    <h1>
+        Subscription Payments
+    </h1>
+
+    <a
+        href="dashboard.html"
+        class="back-btn"
+    >
+        ← Dashboard
+    </a>
+
+</header>
+
+
+<div class="container">
+
+
+    <!-- ================================================= -->
+    <!-- STATISTICS -->
+    <!-- ================================================= -->
+
+    <div class="cards">
+
+        <div class="card student-card">
+
+            <h3>
+                Active Students
+            </h3>
+
+            <div
+                class="value"
+                id="activeStudents"
+            >
+                0
+            </div>
+
+        </div>
+
+
+        <div class="card laundromat-card">
+
+            <h3>
+                Active Laundromats
+            </h3>
+
+            <div
+                class="value"
+                id="activeLaundromats"
+            >
+                0
+            </div>
+
+        </div>
+
+
+        <div class="card revenue-card">
+
+            <h3>
+                Student Revenue
+            </h3>
+
+            <div
+                class="value"
+                id="studentRevenue"
+            >
+                R0.00
+            </div>
+
+        </div>
+
+
+        <div class="card revenue-card">
+
+            <h3>
+                Laundromat Revenue
+            </h3>
+
+            <div
+                class="value"
+                id="laundromatRevenue"
+            >
+                R0.00
+            </div>
+
+        </div>
+
+
+        <div class="card total-card">
+
+            <h3>
+                Total Revenue
+            </h3>
+
+            <div
+                class="value"
+                id="totalRevenue"
+            >
+                R0.00
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ================================================= -->
+    <!-- SUBSCRIPTIONS TABLE -->
+    <!-- ================================================= -->
+
+    <div class="section">
+
+        <div class="section-header">
+
+            <h2>
+                Subscription Payments
+            </h2>
+
+            <div class="filters">
+
+                <button
+                    class="active"
+                    onclick="filterSubscriptions('all', this)"
+                >
+                    All
+                </button>
+
+                <button
+                    onclick="filterSubscriptions('student', this)"
+                >
+                    Students
+                </button>
+
+                <button
+                    onclick="filterSubscriptions('laundromat', this)"
+                >
+                    Laundromats
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <div class="table-container">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Name
+                        </th>
+
+                        <th>
+                            Type
+                        </th>
+
+                        <th>
+                            Email
+                        </th>
+
+                        <th>
+                            Plan
+                        </th>
+
+                        <th>
+                            Amount
+                        </th>
+
+                        <th>
+                            Payment Method
+                        </th>
+
+                        <th>
+                            Transaction
+                        </th>
+
+                        <th>
+                            Status
+                        </th>
+
+                        <th>
+                            Start Date
+                        </th>
+
+                        <th>
+                            End Date
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody id="subscriptionTable">
+
+                    <tr>
+
+                        <td
+                            colspan="10"
+                            class="loading"
+                        >
+                            Loading subscriptions...
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+const API = "https://laundry-ktbs.onrender.com";
+
+let allSubscriptions = [];
+
+
+// ========================================================
+// LOAD DATA
+// ========================================================
+
+async function loadSubscriptions() {
+
+    try {
+
+        const response = await fetch(
+            `${API}/admin/subscriptions`
+        );
+
+
+        // Check HTTP status BEFORE parsing JSON
+
+        if (!response.ok) {
+
+            const text = await response.text();
+
+            console.error(
+                "ADMIN SUBSCRIPTIONS HTTP ERROR:",
+                response.status,
+                text
+            );
+
+            throw new Error(
+                `Server returned HTTP ${response.status}`
+            );
+
+        }
+
+
+        const result =
+            await response.json();
+
+
+        console.log(
+            "ADMIN SUBSCRIPTIONS:",
+            result
+        );
+
+
+        if (!result.success) {
+
+            throw new Error(
+                result.message ||
+                "Unable to load subscriptions."
+            );
+
+        }
+
+
+        // ====================================================
+        // SAVE SUBSCRIPTIONS
+        // ====================================================
+
+        allSubscriptions =
+            result.subscriptions || [];
+
+
+        const statistics =
+            result.statistics || {};
+
+
+        // ====================================================
+        // STATISTICS
+        // ====================================================
+
+        const activeStudents =
+            document.getElementById(
+                "activeStudents"
+            );
+
+        if (activeStudents) {
+
+            activeStudents.textContent =
+                statistics.active_students || 0;
+
+        }
+
+
+        const activeLaundromats =
+            document.getElementById(
+                "activeLaundromats"
+            );
+
+        if (activeLaundromats) {
+
+            activeLaundromats.textContent =
+                statistics.active_laundromats || 0;
+
+        }
+
+
+        const studentRevenue =
+            document.getElementById(
+                "studentRevenue"
+            );
+
+        if (studentRevenue) {
+
+            studentRevenue.textContent =
+                formatMoney(
+                    statistics.student_revenue || 0
+                );
+
+        }
+
+
+        const laundromatRevenue =
+            document.getElementById(
+                "laundromatRevenue"
+            );
+
+        if (laundromatRevenue) {
+
+            laundromatRevenue.textContent =
+                formatMoney(
+                    statistics.laundromat_revenue || 0
+                );
+
+        }
+
+
+        const totalRevenue =
+            document.getElementById(
+                "totalRevenue"
+            );
+
+        if (totalRevenue) {
+
+            totalRevenue.textContent =
+                formatMoney(
+                    statistics.total_revenue || 0
+                );
+
+        }
+
+
+        // ====================================================
+        // TOTAL SUBSCRIPTIONS
+        // ====================================================
+
+        const totalSubscriptions =
+            document.getElementById(
+                "totalSubscriptions"
+            );
+
+        if (totalSubscriptions) {
+
+            totalSubscriptions.textContent =
+                statistics.total_subscriptions || 0;
+
+        }
+
+
+        // ====================================================
+        // RENDER TABLE
+        // ====================================================
+
+        renderSubscriptions(
+            allSubscriptions
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "ADMIN SUBSCRIPTION ERROR:",
+            error
+        );
+
+
+        const table =
+            document.getElementById(
+                "subscriptionTable"
+            );
+
+
+        if (table) {
+
+            table.innerHTML = `
+
+                <tr>
+
+                    <td
+                        colspan="10"
+                        class="error"
+                    >
+
+                        Unable to load subscriptions.
+
+                        <br>
+
+                        ${error.message}
+
+                    </td>
+
+                </tr>
+
+            `;
+
+        }
+
+    }
+
+}
+
+
+
+// ========================================================
+// RENDER TABLE
+// ========================================================
+
+function renderSubscriptions(
+    subscriptions
+) {
+
+    const table =
+        document.getElementById(
+            "subscriptionTable"
+        );
+
+
+    if (!table) {
+
+        console.error(
+            "subscriptionTable element not found."
+        );
+
+        return;
+
+    }
+
+
+    if (!subscriptions.length) {
+
+        table.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="10"
+                    style="
+                        text-align:center;
+                        padding:30px;
+                    "
+                >
+
+                    No subscriptions found.
+
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+
+    }
+
+
+    table.innerHTML =
+        subscriptions.map(
+            subscription => {
+
+
+                // =================================================
+                // NAME
+                // =================================================
+
+                let name = "-";
+
+
+                if (
+                    subscription.role ===
+                    "student"
+                ) {
+
+                    name =
+                        `${subscription.first_name || ""}
+                         ${subscription.last_name || ""}`
+                        .trim();
+
+                }
+
+                else if (
+                    subscription.role ===
+                    "laundromat"
+                ) {
+
+                    name =
+                        subscription.business_name ||
+                        `${subscription.first_name || ""}
+                         ${subscription.last_name || ""}`
+                        .trim();
+
+                }
+
+
+                // =================================================
+                // ROLE
+                // =================================================
+
+                const role =
+                    subscription.role ||
+                    "-";
+
+
+                // =================================================
+                // STATUS
+                // =================================================
+
+                const status =
+                    subscription.status ||
+                    "Pending";
+
+
+                const statusClass =
+                    status
+                        .toLowerCase()
+                        .replace(/\s+/g, "-");
+
+
+                // =================================================
+                // RETURN ROW
+                // =================================================
+
+                return `
+
+                    <tr>
+
+                        <!-- NAME -->
+
+                        <td>
+                            ${name}
+                        </td>
+
+
+                        <!-- ROLE -->
+
+                        <td>
+
+                            <span
+                                class="role ${role}"
+                            >
+
+                                ${role.toUpperCase()}
+
+                            </span>
+
+                        </td>
+
+
+                        <!-- EMAIL -->
+
+                        <td>
+                            ${subscription.email || "-"}
+                        </td>
+
+
+                        <!-- PLAN -->
+
+                        <td>
+                            ${subscription.plan || "-"}
+                        </td>
+
+
+                        <!-- AMOUNT -->
+
+                        <td class="amount">
+
+                            ${formatMoney(
+                                subscription.amount
+                            )}
+
+                        </td>
+
+
+                        <!-- PAYMENT METHOD -->
+
+                        <td>
+
+                            ${
+                                subscription.payment_method
+                                || "-"
+                            }
+
+                        </td>
+
+
+                        <!-- TRANSACTION -->
+
+                        <td>
+
+                            ${
+                                subscription.transaction_id
+                                || "-"
+                            }
+
+                        </td>
+
+
+                        <!-- STATUS -->
+
+                        <td>
+
+                            <span
+                                class="status ${statusClass}"
+                            >
+
+                                ${status}
+
+                            </span>
+
+                        </td>
+
+
+                        <!-- START -->
+
+                        <td>
+
+                            ${formatDate(
+                                subscription.start_date
+                            )}
+
+                        </td>
+
+
+                        <!-- END -->
+
+                        <td>
+
+                            ${formatDate(
+                                subscription.end_date
+                            )}
+
+                        </td>
+
+                    </tr>
+
+                `;
+
+            }
+
+        ).join("");
+
+}
+
+
+
+// ========================================================
+// FILTER
+// ========================================================
+
+function filterSubscriptions(
+    role,
+    button
+) {
+
+    document
+        .querySelectorAll(
+            ".filters button"
+        )
+        .forEach(
+            btn =>
+                btn.classList.remove(
+                    "active"
+                )
+        );
+
+
+    button.classList.add(
+        "active"
+    );
+
+
+    if (role === "all") {
+
+        renderSubscriptions(
+            allSubscriptions
+        );
+
+        return;
+
+    }
+
+
+    const filtered =
+        allSubscriptions.filter(
+            subscription =>
+                subscription.role === role
+        );
+
+
+    renderSubscriptions(
+        filtered
+    );
+
+}
+
+
+
+// ========================================================
+// MONEY
+// ========================================================
+
+function formatMoney(
+    amount
+) {
+
+    return new Intl.NumberFormat(
+        "en-ZA",
+        {
+            style: "currency",
+            currency: "ZAR"
+        }
+    ).format(
+        Number(amount || 0)
+    );
+
+}
+
+
+
+// ========================================================
+// DATE
+// ========================================================
+
+function formatDate(
+    date
+) {
+
+    if (!date) {
+
+        return "-";
+
+    }
+
+
+    const parsedDate =
+        new Date(date);
+
+
+    if (
+        Number.isNaN(
+            parsedDate.getTime()
+        )
+    ) {
+
+        return "-";
+
+    }
+
+
+    return parsedDate.toLocaleDateString(
+        "en-ZA"
+    );
+
+}
+
+
+
+// ========================================================
+// START
+// ========================================================
+
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        loadSubscriptions();
+
+    }
+);
+
+</script>
+
+</body>
+
+</html>

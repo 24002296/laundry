@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | Campus Laundry Connect</title>
+
+    <link rel="stylesheet" href="register.css">
+
+    <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+</head>
+<body>
+
+<div class="container">
+
+<div class="right-side">
+
+<form id="registerForm">
+
+<h2>Create Account</h2>
+
+<p class="subtitle">
+Register for Campus Laundry Connect
+</p>
+
+<!-- Role Selection -->
+
+<div class="role-selection">
+
+<label class="role-title">
+Register As
+</label>
+
+<div class="roles">
+
+<label>
+
+<input
+type="radio"
+name="role"
+value="student"
+onclick="showStudent()"
+required>
+
+Student
+
+</label>
+
+<label>
+
+<input
+type="radio"
+name="role"
+value="laundromat"
+onclick="showLaundromat()">
+
+Laundromat
+
+</label>
+
+</div>
+
+</div>
+
+<div class="row">
+
+<div class="input-box">
+
+<label>First Name</label>
+
+<input
+type="text"
+placeholder="Enter first name"
+required>
+
+</div>
+
+<div class="input-box">
+
+<label>Last Name</label>
+
+<input
+type="text"
+placeholder="Enter last name"
+required>
+
+</div>
+
+</div>
+
+<!-- Student Fields -->
+
+<div id="studentFields">
+
+<div class="input-box">
+
+<label>Student Number</label>
+
+<input
+type="text"
+placeholder="Enter student number">
+
+</div>
+
+</div>
+
+<!-- Laundromat Fields -->
+
+<div id="laundromatFields" style="display:none;">
+
+<div class="input-box">
+
+<label>Business Name</label>
+
+<input
+type="text"
+placeholder="Enter business name">
+
+</div>
+
+<div class="input-box">
+
+<label>Business Address</label>
+
+<input
+type="text"
+placeholder="Enter business address">
+
+</div>
+
+</div>
+
+<div class="input-box">
+
+<label>Email Address</label>
+
+<input
+type="email"
+placeholder="Enter email"
+required>
+
+</div>
+
+<div class="input-box">
+
+<label>Phone Number</label>
+
+<input
+type="text"
+placeholder="Enter phone number"
+required>
+
+</div>
+
+<div class="input-box">
+
+<label>Password</label>
+
+<input
+type="password"
+placeholder="Create password"
+required>
+
+</div>
+
+<div class="input-box">
+
+<label>Confirm Password</label>
+
+<input
+type="password"
+placeholder="Confirm password"
+required>
+
+</div>
+
+<button type="submit">
+
+Register
+
+</button>
+
+<p class="login">
+
+Already have an account?
+
+<a href="login.html">
+
+Login
+
+</a>
+
+</p>
+
+</form>
+
+</div>
+
+</div>
+
+<script>
+
+// ============================================================
+// SHOW STUDENT FIELDS
+// ============================================================
+
+function showStudent() {
+
+    const studentFields =
+        document.getElementById("studentFields");
+
+    const laundromatFields =
+        document.getElementById("laundromatFields");
+
+    if (studentFields) {
+        studentFields.style.display = "block";
+    }
+
+    if (laundromatFields) {
+        laundromatFields.style.display = "none";
+    }
+}
+
+
+// ============================================================
+// SHOW LAUNDROMAT FIELDS
+// ============================================================
+
+function showLaundromat() {
+
+    const studentFields =
+        document.getElementById("studentFields");
+
+    const laundromatFields =
+        document.getElementById("laundromatFields");
+
+    if (studentFields) {
+        studentFields.style.display = "none";
+    }
+
+    if (laundromatFields) {
+        laundromatFields.style.display = "block";
+    }
+}
+
+
+// ============================================================
+// REGISTER FORM
+// ============================================================
+
+const registerForm =
+    document.getElementById("registerForm");
+
+
+if (!registerForm) {
+
+    console.error(
+        "registerForm was not found."
+    );
+
+} else {
+
+    registerForm.addEventListener(
+        "submit",
+        async function (e) {
+
+            e.preventDefault();
+
+            console.log(
+                "REGISTER FORM SUBMITTED"
+            );
+
+
+            // ====================================================
+            // GET ROLE
+            // ====================================================
+
+            const roleElement =
+                document.querySelector(
+                    'input[name="role"]:checked'
+                );
+
+
+            if (!roleElement) {
+
+                alert(
+                    "Please select an account type."
+                );
+
+                return;
+            }
+
+
+            const role =
+                roleElement.value;
+
+
+            console.log(
+                "Selected role:",
+                role
+            );
+
+
+            // ====================================================
+            // GET COMMON FIELDS
+            // ====================================================
+
+            const firstNameInput =
+                document.querySelector(
+                    'input[placeholder="Enter first name"]'
+                );
+
+            const lastNameInput =
+                document.querySelector(
+                    'input[placeholder="Enter last name"]'
+                );
+
+            const emailInput =
+                document.querySelector(
+                    'input[type="email"]'
+                );
+
+            const phoneInput =
+                document.querySelector(
+                    'input[placeholder="Enter phone number"]'
+                );
+
+            const passwordInput =
+                document.querySelector(
+                    'input[placeholder="Create password"]'
+                );
+
+            const confirmPasswordInput =
+                document.querySelector(
+                    'input[placeholder="Confirm password"]'
+                );
+
+
+            if (
+                !firstNameInput ||
+                !lastNameInput ||
+                !emailInput ||
+                !phoneInput ||
+                !passwordInput ||
+                !confirmPasswordInput
+            ) {
+
+                console.error(
+                    "One or more registration fields were not found."
+                );
+
+                alert(
+                    "Registration form fields are missing."
+                );
+
+                return;
+            }
+
+
+            const firstName =
+                firstNameInput.value.trim();
+
+            const lastName =
+                lastNameInput.value.trim();
+
+            const email =
+                emailInput.value.trim();
+
+            const phone =
+                phoneInput.value.trim();
+
+            const password =
+                passwordInput.value;
+
+            const confirmPassword =
+                confirmPasswordInput.value;
+
+
+            // ====================================================
+            // VALIDATION
+            // ====================================================
+
+            if (!firstName) {
+
+                alert(
+                    "Please enter your first name."
+                );
+
+                return;
+            }
+
+
+            if (!lastName) {
+
+                alert(
+                    "Please enter your last name."
+                );
+
+                return;
+            }
+
+
+            if (!email) {
+
+                alert(
+                    "Please enter your email address."
+                );
+
+                return;
+            }
+
+
+            if (!email.includes("@")) {
+
+                alert(
+                    "Please enter a valid email address."
+                );
+
+                return;
+            }
+
+
+            if (!phone) {
+
+                alert(
+                    "Please enter your phone number."
+                );
+
+                return;
+            }
+
+
+            if (!password) {
+
+                alert(
+                    "Please create a password."
+                );
+
+                return;
+            }
+
+
+            if (password !== confirmPassword) {
+
+                alert(
+                    "Passwords do not match."
+                );
+
+                return;
+            }
+
+
+            // ====================================================
+            // ROLE-SPECIFIC DATA
+            // ====================================================
+
+            let studentNumber = "";
+
+            let businessName = "";
+
+            let businessAddress = "";
+
+
+            if (role === "student") {
+
+                const studentInput =
+                    document.querySelector(
+                        '#studentFields input'
+                    );
+
+
+                if (!studentInput) {
+
+                    alert(
+                        "Student number field was not found."
+                    );
+
+                    return;
+                }
+
+
+                studentNumber =
+                    studentInput.value.trim();
+
+
+                if (!studentNumber) {
+
+                    alert(
+                        "Please enter your student number."
+                    );
+
+                    return;
+                }
+            }
+
+
+            if (role === "laundromat") {
+
+                const businessNameInput =
+                    document.querySelector(
+                        'input[placeholder="Enter business name"]'
+                    );
+
+                const businessAddressInput =
+                    document.querySelector(
+                        'input[placeholder="Enter business address"]'
+                    );
+
+
+                if (
+                    !businessNameInput ||
+                    !businessAddressInput
+                ) {
+
+                    alert(
+                        "Laundromat fields were not found."
+                    );
+
+                    return;
+                }
+
+
+                businessName =
+                    businessNameInput.value.trim();
+
+                businessAddress =
+                    businessAddressInput.value.trim();
+
+
+                if (!businessName) {
+
+                    alert(
+                        "Please enter the business name."
+                    );
+
+                    return;
+                }
+
+
+                if (!businessAddress) {
+
+                    alert(
+                        "Please enter the business address."
+                    );
+
+                    return;
+                }
+            }
+
+
+            // ====================================================
+            // CREATE REQUEST DATA
+            // ====================================================
+
+            const registrationData = {
+
+                first_name: firstName,
+
+                last_name: lastName,
+
+                email: email,
+
+                phone: phone,
+
+                password: password,
+
+                role: role,
+
+                student_number: studentNumber,
+
+                business_name: businessName,
+
+                business_address: businessAddress
+
+            };
+
+
+            console.log(
+                "REGISTRATION DATA:",
+                registrationData
+            );
+
+
+            // ====================================================
+            // SEND TO FLASK
+            // ====================================================
+
+            try {
+
+                const response =
+                    await fetch(
+                        "https://laundry-ktbs.onrender.com/register",
+                        {
+
+                            method: "POST",
+
+                            headers: {
+
+                                "Content-Type":
+                                    "application/json"
+
+                            },
+
+                            body:
+                                JSON.stringify(
+                                    registrationData
+                                )
+
+                        }
+                    );
+
+
+                console.log(
+                    "REGISTER HTTP STATUS:",
+                    response.status
+                );
+
+
+                // =================================================
+                // READ SERVER RESPONSE
+                // =================================================
+
+                const result =
+                    await response.json();
+
+
+                console.log(
+                    "REGISTER RESPONSE:",
+                    result
+                );
+
+
+                // =================================================
+                // SUCCESS
+                // =================================================
+
+                if (
+                    response.ok &&
+                    result.success
+                ) {
+
+                    alert(
+                        result.message ||
+                        "Registration successful."
+                    );
+
+
+                    window.location.href =
+                        "login.html";
+
+
+                    return;
+                }
+
+
+                // =================================================
+                // SERVER ERROR
+                // =================================================
+
+                alert(
+                    result.message ||
+                    "Registration failed."
+                );
+
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "REGISTRATION ERROR:",
+                    error
+                );
+
+
+                alert(
+                    "Unable to connect to the server. " +
+                    "Make sure Flask is running."
+                );
+
+            }
+
+        }
+    );
+}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Student Dashboard | Campus Laundry Connect</title>
+
+<link rel="stylesheet" href="dashboard.css">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+</head>
+
+<body>
+
+<div class="container">
+
+<!-- Sidebar -->
+
+<aside class="sidebar">
+
+<h2>🧺 LaundryConnect</h2>
+
+<ul>
+
+<li class="active">
+<i class="fa-solid fa-house"></i>
+Dashboard
+</li>
+
+<li>
+<a href="laundromats.html">
+<i class="fa-solid fa-store"></i>
+Laundromats
+</a>
+</li>
+
+<li>
+<a href="book-laundry.html">
+<i class="fa-solid fa-calendar-check"></i>
+Book Laundry
+</a>
+</li>
+
+<li>
+<a href="my-orders.html">
+<i class="fa-solid fa-box"></i>
+My Orders
+</a>
+</li>
+
+<li>
+<a href="track-order.html">
+<i class="fa-solid fa-location-dot"></i>
+Track Order
+</a>
+</li>
+
+<li>
+<a href="profile.html">
+<i class="fa-solid fa-user"></i>
+Profile
+</a>
+</li>
+
+<li>
+
+<a href="#" id="logoutBtn">
+
+<i class="fa-solid fa-right-from-bracket"></i>
+
+Logout
+
+</a>
+
+</li>
+
+</ul>
+
+</aside>
+
+<!-- Main -->
+
+<main class="main-content">
+
+<header>
+
+<div>
+
+<h1 id="welcomeMessage"></h1>
+
+<p>Let's get your laundry done today.</p>
+
+</div>
+
+<div class="profile">
+
+<img
+    id="studentProfilePicture"
+    src="../images/default-profile.png"
+    alt="Student Profile Picture"
+>
+
+
+<div>
+
+<h3 id="studentName"></h3>
+
+<p id="studentEmail"></p>
+
+</div>
+
+</div>
+
+</header>
+
+<!-- Search -->
+
+<section class="search">
+
+    <input
+        type="text"
+        id="searchLaundromat"
+        placeholder="Search laundromats...">
+
+    <button
+        type="button"
+        id="searchBtn">
+
+        <i class="fa-solid fa-magnifying-glass"></i>
+
+    </button>
+
+</section>
+<!-- Statistics -->
+
+<section class="stats">
+
+<div class="card">
+
+<i class="fa-solid fa-basket-shopping"></i>
+
+<h2 id="totalOrders">0</h2>
+
+<p>Total Orders</p>
+
+</div>
+
+<div class="card">
+
+<i class="fa-solid fa-spinner"></i>
+
+<h2 id="processingOrders">0</h2>
+
+<p>Processing</p>
+
+</div>
+
+<div class="card">
+
+<i class="fa-solid fa-circle-check"></i>
+
+<h2 id="completedOrders">0</h2>
+
+<p>Completed</p>
+
+</div>
+
+<div class="card">
+
+<i class="fa-solid fa-phone"></i>
+
+<h2 id="studentPhone"></h2>
+
+<p>Phone Number</p>
+
+</div>
+
+</section>
+
+<!-- Laundromats -->
+
+<section>
+
+<h2 class="title">
+
+Available Laundromats
+
+</h2>
+
+<div
+class="laundromats"
+id="laundromatContainer">
+
+<!-- JavaScript loads laundromats -->
+
+</div>
+
+</section>
+
+<!-- Orders -->
+
+<section class="orders">
+
+<h2 class="title">
+
+Recent Orders
+
+</h2>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Booking ID</th>
+
+<th>Laundromat</th>
+
+<th>Status</th>
+
+<th>Date</th>
+
+</tr>
+
+</thead>
+
+<tbody id="ordersTable">
+
+</tbody>
+
+</table>
+
+</section>
+
+</main>
+
+</div>
+
+<!-- JavaScript goes here -->
+<script>
+
+const API_URL = "https://laundry-ktbs.onrender.com";
+
+async function requireSubscription() {
+
+    const user =
+        JSON.parse(
+            localStorage.getItem("loggedInUser")
+        );
+
+
+    if (!user) {
+
+        window.location.href =
+            "../login.html";
+
+        return;
+
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                `https://laundry-ktbs.onrender.com/subscriptions/user/${user.id}`
+            );
+
+
+        const result =
+            await response.json();
+
+
+        if (!result.subscribed) {
+
+            alert(
+                "Please activate a subscription first."
+            );
+
+
+            window.location.href =
+                "subscription.html";
+
+        }
+
+    }
+
+    catch(error) {
+
+        console.error(
+            "SUBSCRIPTION CHECK ERROR:",
+            error
+        );
+
+    }
+
+}
+
+
+window.onload = function() {
+
+    requireSubscription();
+
+};
+
+let allLaundromats = [];
+// =====================================================
+// GET LOGGED IN USER
+// =====================================================
+
+const user = JSON.parse(
+    localStorage.getItem("loggedInUser")
+);
+
+if (!user || user.role !== "student") {
+
+    alert("Please login first.");
+
+    window.location.href = "../login.html";
+
+}
+
+
+// =====================================================
+// DISPLAY STUDENT INFORMATION
+// =====================================================
+
+const firstName =
+    user.first_name ||
+    user.firstName ||
+    "";
+
+const lastName =
+    user.last_name ||
+    user.lastName ||
+    "";
+
+const email =
+    user.email ||
+    "";
+
+const phone =
+    user.phone ||
+    "";
+
+const fullName =
+    `${firstName} ${lastName}`.trim();
+
+
+document.getElementById("welcomeMessage").textContent =
+    "Welcome, " + firstName + " 👋";
+
+document.getElementById("studentName").textContent =
+    fullName;
+
+document.getElementById("studentEmail").textContent =
+    email;
+
+document.getElementById("studentPhone").textContent =
+    phone || "Not Available";
+
+
+// =====================================================
+// LOGOUT
+// =====================================================
+
+document
+.getElementById("logoutBtn")
+.addEventListener("click", function (e) {
+
+    e.preventDefault();
+
+    localStorage.removeItem("loggedInUser");
+
+    window.location.href = "../login.html";
+
+});
+
+
+// =====================================================
+// LOAD AVAILABLE LAUNDROMATS
+// =====================================================
+
+async function loadLaundromats() {
+
+    const container =
+        document.getElementById("laundromatContainer");
+
+    try {
+
+        console.log("Loading laundromats...");
+
+        const response = await fetch(
+            API_URL + "/laundromats"
+        );
+
+        console.log(
+            "Laundromats HTTP status:",
+            response.status
+        );
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Server returned HTTP " +
+                response.status
+            );
+
+        }
+
+        const data = await response.json();
+
+        console.log(
+            "Laundromats response:",
+            data
+        );
+
+        allLaundromats =
+            data.laundromats || [];
+
+        displayLaundromats(
+            allLaundromats
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Laundromat Error:",
+            error
+        );
+
+        container.innerHTML = `
+
+            <p class="empty-message">
+
+                Unable to load laundromats.
+
+            </p>
+
+        `;
+
+    }
+
+}
+function displayLaundromats(laundromats) {
+
+    const container =
+        document.getElementById(
+            "laundromatContainer"
+        );
+
+    container.innerHTML = "";
+
+
+    if (laundromats.length === 0) {
+
+        container.innerHTML = `
+
+            <p class="empty-message">
+
+                No laundromats found.
+
+            </p>
+
+        `;
+
+        return;
+
+    }
+
+
+    laundromats.forEach(function (shop) {
+
+        container.innerHTML += `
+
+            <div class="laundry-card">
+
+                <img
+                    src="../images/laundry.png"
+                    alt="Laundry">
+
+                <h3>
+                    ${shop.business_name ||
+                      "Laundry Business"}
+                </h3>
+
+                <p>
+                    <i class="fa-solid fa-envelope"></i>
+                    ${shop.email ||
+                      "Not Available"}
+                </p>
+
+                <p>
+                    <i class="fa-solid fa-phone"></i>
+                    ${shop.phone ||
+                      "Not Available"}
+                </p>
+
+                <button
+                    onclick="bookLaundry(${shop.id})">
+
+                    <i class="fa-solid fa-calendar-check"></i>
+
+                    Book Now
+
+                </button>
+
+            </div>
+
+        `;
+
+    });
+
+}
+
+// =====================================================
+// SEARCH LAUNDROMATS
+// =====================================================
+
+function searchLaundromats() {
+
+    const searchInput =
+        document.getElementById(
+            "searchLaundromat"
+        );
+
+    const searchValue =
+        searchInput.value
+        .toLowerCase()
+        .trim();
+
+
+    const filteredLaundromats =
+        allLaundromats.filter(function (shop) {
+
+            const businessName =
+                (
+                    shop.business_name || ""
+                ).toLowerCase();
+
+            const email =
+                (
+                    shop.email || ""
+                ).toLowerCase();
+
+            const phone =
+                (
+                    shop.phone || ""
+                ).toLowerCase();
+
+            const address =
+                (
+                    shop.business_address ||
+                    shop.address ||
+                    ""
+                ).toLowerCase();
+
+
+            return (
+
+                businessName.includes(
+                    searchValue
+                ) ||
+
+                email.includes(
+                    searchValue
+                ) ||
+
+                phone.includes(
+                    searchValue
+                ) ||
+
+                address.includes(
+                    searchValue
+                )
+
+            );
+
+        });
+
+
+    displayLaundromats(
+        filteredLaundromats
+    );
+
+}
+
+
+document
+.getElementById("searchBtn")
+.addEventListener(
+    "click",
+    searchLaundromats
+);
+
+document
+.getElementById("searchLaundromat")
+.addEventListener(
+    "keyup",
+    function(e) {
+
+        if (e.key === "Enter") {
+
+            searchLaundromats();
+
+        }
+
+    }
+);
+
+document
+.getElementById("searchLaundromat")
+.addEventListener(
+    "input",
+    searchLaundromats
+);
+// =====================================================
+// LOAD RECENT ORDERS
+// =====================================================
+
+async function loadOrders() {
+
+    const table =
+        document.getElementById("ordersTable");
+
+    try {
+
+        console.log("Loading orders...");
+
+        const response = await fetch(
+            API_URL + "/orders"
+        );
+
+        console.log(
+            "Orders HTTP status:",
+            response.status
+        );
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Server returned HTTP " +
+                response.status
+            );
+
+        }
+
+        const data = await response.json();
+
+        console.log(
+            "Orders response:",
+            data
+        );
+
+
+        const allOrders =
+            data.orders || [];
+
+
+        /*
+         * Your orders data uses student_name.
+         *
+         * We therefore compare it with the
+         * logged-in student's full name.
+         */
+
+        const myOrders =
+            allOrders.filter(function (order) {
+
+                const orderStudent =
+                    order.student_name ||
+                    order.student ||
+                    "";
+
+                return (
+                    orderStudent.toLowerCase().trim()
+                    ===
+                    fullName.toLowerCase().trim()
+                );
+
+            });
+
+
+        // =================================================
+        // STATISTICS
+        // =================================================
+
+        document.getElementById(
+            "totalOrders"
+        ).textContent = myOrders.length;
+
+
+        document.getElementById(
+            "processingOrders"
+        ).textContent =
+
+            myOrders.filter(function (order) {
+
+                return (
+                    order.status === "Processing" ||
+                    order.status === "Washing" ||
+                    order.status === "Drying" ||
+                    order.status === "Confirmed"
+                );
+
+            }).length;
+
+
+        document.getElementById(
+            "completedOrders"
+        ).textContent =
+
+            myOrders.filter(function (order) {
+
+                return order.status === "Completed";
+
+            }).length;
+
+
+        // =================================================
+        // DISPLAY TABLE
+        // =================================================
+
+        table.innerHTML = "";
+
+
+        if (myOrders.length === 0) {
+
+            table.innerHTML = `
+
+                <tr>
+
+                    <td
+                        colspan="4"
+                        style="text-align:center;">
+
+                        No orders found.
+
+                    </td>
+
+                </tr>
+
+            `;
+
+            return;
+
+        }
+
+
+        // Show newest orders first
+
+        myOrders
+        .slice()
+        .reverse()
+        .slice(0, 5)
+        .forEach(function (order) {
+
+            table.innerHTML += `
+
+                <tr>
+
+                    <td>
+                        ${order.booking_number || order.id}
+                    </td>
+
+                    <td>
+                        ${order.business_name || "Not Available"}
+                    </td>
+
+                    <td>
+                        <span class="status ${getStatusClass(order.status)}">
+
+                            ${order.status || "Pending"}
+
+                        </span>
+                    </td>
+
+                    <td>
+                        ${order.pickup_date || "Not Available"}
+                    </td>
+
+                </tr>
+
+            `;
+
+        });
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Orders Error:",
+            error
+        );
+
+        table.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="4"
+                    style="text-align:center;">
+
+                    Unable to load orders.
+
+                </td>
+
+            </tr>
+
+        `;
+
+    }
+
+}
+
+
+// =====================================================
+// STATUS CSS CLASS
+// =====================================================
+
+function getStatusClass(status) {
+
+    if (!status) {
+
+        return "pending";
+
+    }
+
+
+    switch (status.toLowerCase()) {
+
+        case "confirmed":
+            return "confirmed";
+
+        case "processing":
+            return "processing";
+
+        case "washing":
+            return "washing";
+
+        case "drying":
+            return "drying";
+
+        case "ready for pickup":
+            return "ready";
+
+        case "completed":
+            return "completed";
+
+        case "cancelled":
+            return "cancelled";
+
+        default:
+            return "pending";
+
+    }
+
+}
+
+
+// =====================================================
+// BOOK LAUNDRY
+// =====================================================
+
+function bookLaundry(laundromatId) {
+
+    /*
+     * Store the actual laundromat ID.
+     * Do NOT store the email.
+     */
+
+    localStorage.setItem(
+        "selectedLaundromat",
+        laundromatId
+    );
+
+
+    window.location.href =
+        "book-laundry.html";
+
+}
+
+// =====================================================
+// LOAD STUDENT PROFILE PICTURE
+// =====================================================
+
+async function loadStudentProfile() {
+
+    const profileImage =
+        document.getElementById("studentProfilePicture");
+
+    if (!user || !user.id) {
+        return;
+    }
+
+    try {
+
+        const response = await fetch(
+            API_URL + "/students/" + user.id
+        );
+
+        const data = await response.json();
+
+        console.log("Student profile:", data);
+
+        if (!response.ok || !data.success) {
+
+            console.log(
+                "Unable to load student profile."
+            );
+
+            return;
+        }
+
+        const student = data.student;
+
+        // ---------------------------------------------
+        // Profile picture
+        // ---------------------------------------------
+
+        if (student.profile_picture) {
+
+            profileImage.src =
+                API_URL +
+                "/uploads/students/" +
+                student.profile_picture;
+
+        } else {
+
+            profileImage.src =
+                "../images/default-profile.png";
+
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Profile picture loading error:",
+            error
+        );
+
+        profileImage.src =
+            "../images/default-profile.png";
+
+    }
+
+}
+
+
+// =====================================================
+// LOAD EVERYTHING
+// =====================================================
+
+window.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        loadStudentProfile();
+
+        loadLaundromats();
+
+        loadOrders();
+
+    }
+);
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Subscription Payment | LaundryConnect</title>
+
+    <link rel="stylesheet" href="subscription-payment.css">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+</head>
+
+<body>
+
+<div class="payment-page">
+
+    <div class="payment-card">
+
+        <div class="payment-icon">
+
+            <i class="fa-solid fa-credit-card"></i>
+
+        </div>
+
+        <h1>Complete Subscription</h1>
+
+        <p class="subtitle">
+            Activate your LaundryConnect subscription.
+        </p>
+
+
+        <!-- Subscription Summary -->
+
+        <div class="summary">
+
+            <div>
+
+                <span>Plan</span>
+
+                <strong id="plan">
+                    -
+                </strong>
+
+            </div>
+
+            <div>
+
+                <span>Amount</span>
+
+                <strong id="amount">
+                    R0
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <!-- Payment Form -->
+
+        <form id="paymentForm">
+
+            <label for="paymentMethod">
+                Payment Method
+            </label>
+
+            <select id="paymentMethod" required>
+
+                <option value="card">
+                    Credit / Debit Card
+                </option>
+
+                <option value="eft">
+                    EFT
+                </option>
+
+                <option value="wallet">
+                    Digital Wallet
+                </option>
+
+            </select>
+
+
+            <button
+                type="submit"
+                class="pay-btn"
+                id="payButton">
+
+                <i class="fa-solid fa-lock"></i>
+
+                Pay & Activate Subscription
+
+            </button>
+
+        </form>
+
+
+        <p class="secure">
+
+            <i class="fa-solid fa-shield-halved"></i>
+
+            Demo payment — no real money will be charged.
+
+        </p>
+
+
+        <button
+            class="back-btn"
+            onclick="goBack()">
+
+            <i class="fa-solid fa-arrow-left"></i>
+
+            Back to Plans
+
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+
+const API = "https://laundry-ktbs.onrender.com";
+
+
+// ======================================================
+// GET LOGGED-IN USER
+// ======================================================
+
+const user =
+    JSON.parse(
+        localStorage.getItem("loggedInUser")
+    );
+
+
+// ======================================================
+// CHECK LOGIN
+// ======================================================
+
+if (!user) {
+
+    alert("Please login first.");
+
+    window.location.href =
+        "../login.html";
+
+}
+
+
+// ======================================================
+// GET SELECTED PLAN
+// ======================================================
+
+const selectedPlan =
+    localStorage.getItem("selectedPlan");
+
+const subscriptionAmount =
+    localStorage.getItem("subscriptionAmount");
+
+
+// ======================================================
+// CHECK PLAN
+// ======================================================
+
+if (!selectedPlan || !subscriptionAmount) {
+
+    alert("Please select a subscription plan.");
+
+    window.location.href =
+        "subscription.html";
+
+}
+
+
+// ======================================================
+// DISPLAY PLAN
+// ======================================================
+
+document.getElementById("plan").textContent =
+    selectedPlan;
+
+document.getElementById("amount").textContent =
+    "R" + Number(subscriptionAmount).toFixed(2);
+
+
+// ======================================================
+// PAYMENT
+// ======================================================
+
+document
+    .getElementById("paymentForm")
+    .addEventListener("submit", async function(event) {
+
+        event.preventDefault();
+
+
+        const paymentMethod =
+            document.getElementById("paymentMethod").value;
+
+        const button =
+            document.getElementById("payButton");
+
+
+        button.disabled = true;
+
+        button.innerHTML =
+            '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+
+
+        try {
+
+            // Normalize role
+            let role =
+                String(
+                    user.role || ""
+                ).toLowerCase();
+
+
+            if (role === "student") {
+
+                role = "student";
+
+            }
+
+            else if (
+                role === "laundromat" ||
+                role === "laundry"
+            ) {
+
+                role = "laundromat";
+
+            }
+
+            else {
+
+                throw new Error(
+                    "Invalid user role."
+                );
+
+            }
+
+
+            // ==================================================
+            // SEND SUBSCRIPTION TO FLASK
+            // ==================================================
+
+            const response =
+                await fetch(
+                    `${API}/subscriptions`,
+                    {
+
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body: JSON.stringify({
+
+                            user_id:
+                                user.id,
+
+                            role:
+                                role,
+
+                            plan:
+                                selectedPlan,
+
+                            amount:
+                                Number(
+                                    subscriptionAmount
+                                ),
+
+                            payment_method:
+                                paymentMethod
+
+                        })
+
+                    }
+                );
+
+
+            const result =
+                await response.json();
+
+
+            if (!response.ok || !result.success) {
+
+                throw new Error(
+                    result.message ||
+                    "Payment failed."
+                );
+
+            }
+
+
+            // ==================================================
+            // SUCCESS
+            // ==================================================
+
+            alert(
+                "Subscription activated successfully!\n\n" +
+                "Plan: " + result.plan +
+                "\nTransaction: " +
+                result.transaction_id
+            );
+
+
+            // Remove temporary plan information
+
+            localStorage.removeItem(
+                "selectedPlan"
+            );
+
+            localStorage.removeItem(
+                "subscriptionAmount"
+            );
+
+
+            // Save subscription information
+
+            localStorage.setItem(
+                "subscriptionActive",
+                "true"
+            );
+
+
+            // ==================================================
+            // REDIRECT
+            // ==================================================
+
+            if (role === "student") {
+
+                window.location.href =
+                    "../student/dashboard.html";
+
+            }
+
+            else {
+
+                window.location.href =
+                    "../laundromat/dashboard.html";
+
+            }
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "SUBSCRIPTION PAYMENT ERROR:",
+                error
+            );
+
+            alert(
+                error.message ||
+                "Unable to process subscription."
+            );
+
+
+            button.disabled = false;
+
+            button.innerHTML =
+                '<i class="fa-solid fa-lock"></i> ' +
+                'Pay & Activate Subscription';
+
+        }
+
+    });
+
+
+// ======================================================
+// BACK
+// ======================================================
+
+function goBack() {
+
+    window.location.href =
+        "subscription.html";
+
+}
+
+</script>
+
+</body>
+
+</html>

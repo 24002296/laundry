@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Campus Laundry Connect</title>
+
+    <link rel="stylesheet" href="dashboard.css">
+
+    <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+<body>
+
+<script>
+
+let user = JSON.parse(localStorage.getItem("loggedInUser"));
+
+if(!user || user.role !== "admin"){
+
+    alert("Please login first.");
+
+    window.location.href="../login.html";
+
+}
+
+</script>
+
+<div class="container">
+
+<!-- Sidebar -->
+
+<aside class="sidebar">
+
+<h2>🧺 LaundryConnect</h2>
+
+<p class="admin-title">Administrator</p>
+
+<ul>
+
+<li class="active">
+<a href="#">
+<i class="fa-solid fa-gauge"></i>
+Dashboard
+</a>
+</li>
+
+<li>
+<a href="students.html">
+<i class="fa-solid fa-user-graduate"></i>
+Students
+</a>
+</li>
+
+<li>
+<a href="laundromats.html">
+<i class="fa-solid fa-store"></i>
+Laundromats
+</a>
+</li>
+
+<li>
+<a href="bookings.html">
+<i class="fa-solid fa-calendar-check"></i>
+Bookings
+</a>
+</li>
+
+<li>
+<a href="payments.html">
+<i class="fa-solid fa-credit-card"></i>
+Payments
+</a>
+</li>
+
+<li>
+<a href="reports.html">
+<i class="fa-solid fa-chart-column"></i>
+Reports
+</a>
+</li>
+
+<li>
+<a href="settings.html">
+<i class="fa-solid fa-gear"></i>
+Settings
+</a>
+</li>
+
+<li>
+<a href="../login.html">
+<i class="fa-solid fa-right-from-bracket"></i>
+Logout
+</a>
+</li>
+
+</ul>
+
+</aside>
+
+<!-- Main -->
+
+<main class="main">
+
+<header>
+
+<div>
+
+<h1>System Dashboard</h1>
+
+<p>
+Welcome back,
+<span id="adminName">Administrator</span>
+</p>
+
+</div>
+
+<button class="refresh" onclick="loadDashboard()">
+
+<i class="fa-solid fa-rotate"></i>
+
+Refresh
+
+</button>
+
+</header>
+
+<!-- Statistics -->
+
+<section class="stats">
+
+<div class="card">
+
+<i class="fa-solid fa-user-graduate"></i>
+
+<h2 id="studentCount">0</h2>
+
+<p>Registered Students</p>
+
+</div>
+
+<div class="card">
+
+<i class="fa-solid fa-store"></i>
+
+<h2 id="laundromatCount">0</h2>
+
+<p>Laundromats</p>
+
+</div>
+
+<div class="card">
+
+<i class="fa-solid fa-calendar-check"></i>
+
+<h2 id="bookingCount">0</h2>
+
+<p>Total Bookings</p>
+
+</div>
+
+<div class="card">
+
+<i class="fa-solid fa-money-bill-wave"></i>
+
+<h2 id="revenue">R0</h2>
+
+<p>Total Revenue</p>
+
+</div>
+
+<div class="dashboard-card">
+
+    <h3>
+        Subscription Payments
+    </h3>
+
+    <p>
+        View students and laundromats
+        who have subscribed.
+    </p>
+
+    <a href="subscriptions.html">
+        View Payments →
+    </a>
+
+</div>
+
+</section>
+<!-- Recent Activity -->
+
+<section class="card">
+
+    <h2>Recent System Activity</h2>
+
+    <table>
+
+        <thead>
+
+            <tr>
+
+                <th>Date</th>
+                <th>User</th>
+                <th>Activity</th>
+                <th>Status</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody id="activityTable">
+
+        </tbody>
+
+    </table>
+
+</section>
+
+<!-- Quick Actions -->
+
+<section class="actions">
+
+    <div class="action-card">
+
+        <i class="fa-solid fa-user-plus"></i>
+
+        <h3>Add Laundromat</h3>
+
+        <button onclick="window.location='laundromats.html'">
+
+            Add
+
+        </button>
+
+    </div>
+
+    <div class="action-card">
+
+        <i class="fa-solid fa-users"></i>
+
+        <h3>Manage Students</h3>
+
+        <button onclick="window.location='students.html'">
+
+            Open
+
+        </button>
+
+    </div>
+
+    <div class="action-card">
+
+        <i class="fa-solid fa-file-export"></i>
+
+        <h3>Reports</h3>
+
+        <button onclick="window.location='reports.html'">
+
+            Open
+
+        </button>
+
+    </div>
+
+    <div class="action-card">
+
+        <i class="fa-solid fa-gears"></i>
+
+        <h3>System Settings</h3>
+
+        <button onclick="window.location='settings.html'">
+
+            Open
+
+        </button>
+
+    </div>
+
+</section>
+<script>
+
+
+// Load Dashboard
+// ==========================================
+// API
+// ==========================================
+
+const API = "https://laundry-ktbs.onrender.com";
+
+
+// ==========================================
+// LOAD ADMIN DASHBOARD
+// ==========================================
+
+async function loadDashboard() {
+
+    try {
+
+        // ======================================
+        // CHECK LOGGED-IN ADMIN
+        // ======================================
+
+        const user = JSON.parse(
+            localStorage.getItem("loggedInUser")
+        );
+
+
+        if (!user || user.role !== "admin") {
+
+            alert("Please login first.");
+
+            window.location.href = "../login.html";
+
+            return;
+
+        }
+
+
+        // ======================================
+        // DISPLAY ADMIN NAME
+        // ======================================
+
+        const firstName =
+            user.first_name ||
+            user.firstName ||
+            "";
+
+        const lastName =
+            user.last_name ||
+            user.lastName ||
+            "";
+
+        document.getElementById(
+            "adminName"
+        ).textContent =
+            `${firstName} ${lastName}`.trim() ||
+            "Administrator";
+
+
+        // ======================================
+        // GET DASHBOARD DATA
+        // ======================================
+
+        const response = await fetch(
+            `${API}/admin/dashboard`
+        );
+
+
+        console.log(
+            "Admin dashboard status:",
+            response.status
+        );
+
+
+        // ======================================
+        // CHECK HTTP RESPONSE
+        // ======================================
+
+        if (!response.ok) {
+
+            throw new Error(
+                `Server returned HTTP ${response.status}`
+            );
+
+        }
+
+
+        const data =
+            await response.json();
+
+
+        console.log(
+            "Admin dashboard data:",
+            data
+        );
+
+
+        // ======================================
+        // CHECK API SUCCESS
+        // ======================================
+
+        if (!data.success) {
+
+            throw new Error(
+                data.message ||
+                "Unable to load dashboard."
+            );
+
+        }
+
+
+        // ======================================
+        // STATISTICS
+        // ======================================
+
+        const statistics =
+            data.statistics || {};
+
+
+        // Students
+
+        document.getElementById(
+            "studentCount"
+        ).textContent =
+            statistics.total_students || 0;
+
+
+        // Laundromats
+
+        document.getElementById(
+            "laundromatCount"
+        ).textContent =
+            statistics.total_laundromats || 0;
+
+
+        // Bookings
+
+        document.getElementById(
+            "bookingCount"
+        ).textContent =
+            statistics.total_bookings || 0;
+
+
+        // Revenue
+
+        document.getElementById(
+            "revenue"
+        ).textContent =
+            "R" +
+            Number(
+                statistics.total_revenue || 0
+            ).toFixed(2);
+
+
+        // ======================================
+        // RECENT SYSTEM ACTIVITY
+        // ======================================
+
+        const table =
+            document.getElementById(
+                "activityTable"
+            );
+
+
+        table.innerHTML = "";
+
+
+        // Backend returns recent_bookings
+
+        const activities =
+            data.recent_bookings || [];
+
+
+        // ======================================
+        // NO ACTIVITY
+        // ======================================
+
+        if (activities.length === 0) {
+
+            table.innerHTML = `
+
+                <tr>
+
+                    <td
+                        colspan="4"
+                        style="text-align:center;"
+                    >
+
+                        No recent activity found.
+
+                    </td>
+
+                </tr>
+
+            `;
+
+            return;
+
+        }
+
+
+        // ======================================
+        // DISPLAY ACTIVITIES
+        // ======================================
+
+        activities.forEach(activity => {
+
+
+            // ----------------------------------
+            // DATE
+            // ----------------------------------
+
+            let date =
+                activity.created_at ||
+                activity.pickup_date ||
+                "-";
+
+
+            // ----------------------------------
+            // USER
+            // ----------------------------------
+
+            let student =
+                activity.student_name ||
+                (
+                    activity.student_id
+                        ? "Student #" +
+                          activity.student_id
+                        : "-"
+                );
+
+
+            // ----------------------------------
+            // ACTIVITY / SERVICE
+            // ----------------------------------
+
+            let service =
+                activity.service ||
+                "Booking";
+
+
+            // ----------------------------------
+            // STATUS
+            // ----------------------------------
+
+            let status =
+                activity.status ||
+                "Pending";
+
+
+            // Make CSS class safe
+
+            let statusClass =
+                status
+                    .toLowerCase()
+                    .replace(/\s+/g, "-");
+
+
+            // ----------------------------------
+            // TABLE ROW
+            // ----------------------------------
+
+            table.innerHTML += `
+
+                <tr>
+
+                    <td>
+                        ${date}
+                    </td>
+
+                    <td>
+                        ${student}
+                    </td>
+
+                    <td>
+                        ${service}
+                    </td>
+
+                    <td>
+
+                        <span
+                            class="status ${statusClass}"
+                        >
+
+                            ${status}
+
+                        </span>
+
+                    </td>
+
+                </tr>
+
+            `;
+
+        });
+
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "ADMIN DASHBOARD ERROR:",
+            error
+        );
+
+
+        alert(
+            "Unable to load admin dashboard."
+        );
+
+    }
+
+}
+
+loadDashboard();
+</script>
+
+</body>
+</html>

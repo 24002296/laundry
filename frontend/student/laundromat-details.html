@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus Laundry Connect</title>
+
+    <link rel="stylesheet" href="laundromat-details.css">
+
+    <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+</head>
+<body>
+
+<div class="container">
+
+    <!-- Sidebar -->
+
+    <aside class="sidebar">
+
+        <h2>🧺 LaundryConnect</h2>
+
+        <ul>
+
+            <li><a href="dashboard.html"><i class="fa-solid fa-house"></i> Dashboard</a></li>
+
+            <li class="active"><a href="laundromats.html"><i class="fa-solid fa-store"></i> Laundromats</a></li>
+
+            <li><a href="book-laundry.html"><i class="fa-solid fa-calendar-check"></i> Book Laundry</a></li>
+
+            <li><a href="my-orders.html"><i class="fa-solid fa-box"></i> My Orders</a></li>
+
+            <li><a href="track-order.html"><i class="fa-solid fa-location-dot"></i> Track Order</a></li>
+
+            <li><a href="profile.html"><i class="fa-solid fa-user"></i> Profile</a></li>
+
+            <li>
+                <a href="#" id="logoutBtn">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    Logout
+                </a>
+            </li>
+
+        </ul>
+
+    </aside>
+
+    <!-- Main -->
+
+    <main class="main-content">
+
+        <!-- Hero -->
+
+        <section class="hero">
+
+            <img
+                id="laundromatLogo"
+                src="../images/laundry.png"
+                alt="Laundry">
+
+            <div class="hero-info">
+
+                <h1 id="businessName">Loading...</h1>
+
+                <p>
+                    <i class="fa-solid fa-location-dot"></i>
+                    <span id="address"></span>
+                </p>
+
+                <p class="rating-display">
+
+                    <i class="fa-solid fa-star"></i>
+
+                    <span id="rating">
+                        No ratings yet
+                    </span>
+
+                </p>
+
+                <p>
+                    <i class="fa-solid fa-clock"></i>
+                    <span id="hours"></span>
+                </p>
+
+                <p>
+                    <i class="fa-solid fa-phone"></i>
+                    <span id="phone"></span>
+                </p>
+
+                <p>
+                    <i class="fa-solid fa-envelope"></i>
+                    <span id="email"></span>
+                </p>
+
+                <a href="book-laundry.html" class="book-btn">
+                    Book Laundry
+                </a>
+
+            </div>
+
+        </section>
+
+        <!-- About -->
+
+        <section class="section">
+
+            <h2>About</h2>
+
+            <p id="about">
+                No description available.
+            </p>
+
+        </section>
+
+        <!-- Services -->
+
+        <section class="section">
+
+            <h2>Available Services</h2>
+
+            <div class="services" id="services">
+
+            </div>
+
+        </section>
+
+        <!-- Machine Availability -->
+
+        <section class="section">
+
+            <h2>Machine Availability</h2>
+
+            <div class="availability">
+
+                <div class="status available">
+
+                    <h3>Washing Machines</h3>
+
+                    <p id="washers">0 Available</p>
+
+                </div>
+
+                <div class="status busy">
+
+                    <h3>Dryers</h3>
+
+                    <p id="dryers">0 Available</p>
+
+                </div>
+
+                <div class="status available">
+
+                    <h3>Express Service</h3>
+
+                    <p id="express">Unavailable</p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- Reviews -->
+
+        <section class="section">
+
+            <h2>Student Reviews</h2>
+
+            <!-- Average rating -->
+
+            <div class="rating-summary">
+
+                <h3 id="averageRating">
+                    ★ 0.0 / 5
+                </h3>
+
+                <p id="reviewCount">
+                    0 reviews
+                </p>
+
+            </div>
+
+
+            <!-- Write Review -->
+
+            <div
+                id="reviewForm"
+                class="review-form"
+            >
+
+                <h3>Rate this laundromat</h3>
+
+                <p>
+                    Share your experience with other students.
+                </p>
+
+
+                <!-- Stars -->
+
+                <div
+                    id="ratingStars"
+                    class="rating-stars"
+                >
+
+                    <button
+                        type="button"
+                        data-rating="1">
+                        ★
+                    </button>
+
+                    <button
+                        type="button"
+                        data-rating="2">
+                        ★
+                    </button>
+
+                    <button
+                        type="button"
+                        data-rating="3">
+                        ★
+                    </button>
+
+                    <button
+                        type="button"
+                        data-rating="4">
+                        ★
+                    </button>
+
+                    <button
+                        type="button"
+                        data-rating="5">
+                        ★
+                    </button>
+
+                </div>
+
+
+                <p id="selectedRating">
+                    Select a rating
+                </p>
+
+
+                <!-- Comment -->
+
+                <textarea
+                    id="reviewComment"
+                    placeholder="Write your review..."
+                    rows="5"></textarea>
+
+
+                <button
+                    type="button"
+                    id="submitReviewBtn">
+
+                    Submit Review
+
+                </button>
+
+            </div>
+
+
+            <!-- Existing Reviews -->
+
+            <div
+                id="reviews"
+                class="reviews-list">
+
+                <p>
+                    Loading reviews...
+                </p>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+<script>
+    // Check Login
+
+const user = JSON.parse(localStorage.getItem("loggedInUser"));
+
+if (!user || user.role !== "student") {
+
+    alert("Please login first.");
+
+    window.location.href = "../login.html";
+
+}
+
+
+// Logout
+document.getElementById("logoutBtn").onclick = function () {
+
+    localStorage.removeItem("loggedInUser");
+
+    window.location.href = "../login.html";
+
+};
+
+
+// Selected laundromat ID
+const laundromatId = localStorage.getItem("selectedLaundromat");
+
+if (!laundromatId) {
+
+    alert("No laundromat selected.");
+
+    window.location.href = "laundromats.html";
+
+}
+
+
+// Load laundromat details
+async function loadLaundromat() {
+
+    try {
+
+        const response = await fetch(
+
+            `https://laundry-ktbs.onrender.com/laundromats/${laundromatId}`
+
+        );
+
+        const data = await response.json();
+
+        if (!data.success) {
+
+            alert(data.message);
+
+            window.location.href = "laundromats.html";
+
+            return;
+
+        }
+
+        const laundromat = data.laundromat;
+
+        const logo = document.getElementById("laundromatLogo");
+
+        if (laundromat.logo) {
+
+            logo.src =
+                `https://laundry-ktbs.onrender.com/uploads/laundromats/${laundromat.logo}`;
+
+        } else {
+
+            logo.src = "../images/laundry.png";
+
+        }
+
+        document.getElementById("businessName").textContent =
+            laundromat.business_name;
+
+        document.getElementById("address").textContent =
+            laundromat.business_address || "Campus Area";
+
+        document.getElementById("phone").textContent =
+            laundromat.phone;
+
+        document.getElementById("email").textContent =
+            laundromat.email;
+
+        document.getElementById("hours").textContent =
+            laundromat.opening_hours || "08:00 - 17:00";
+
+        document.getElementById("about").textContent =
+            laundromat.about || "Professional laundry services for students.";
+
+        document.getElementById("washers").textContent =
+            (laundromat.washers || 0) + " Available";
+
+        document.getElementById("dryers").textContent =
+            (laundromat.dryers || 0) + " Available";
+
+        document.getElementById("express").textContent =
+            laundromat.express_service ? "Available" : "Unavailable";
+
+        loadServices(laundromat.id);
+
+        loadReviews(laundromat.id);
+
+    }
+
+    catch (error) {
+
+        console.log(error);
+
+        alert("Unable to load laundromat.");
+
+    }
+
+    
+
+}
+
+async function loadServices(id) {
+
+    const services =
+        document.getElementById("services");
+
+    services.innerHTML = "";
+
+    try {
+
+        const response = await fetch(
+            `https://laundry-ktbs.onrender.com/services/laundromat/${id}`
+        );
+
+        console.log(
+            "Services HTTP status:",
+            response.status
+        );
+
+        const data = await response.json();
+
+        console.log(
+            "Services response:",
+            data
+        );
+
+        if (!response.ok || !data.success) {
+
+            services.innerHTML =
+                "<p>Unable to load services.</p>";
+
+            return;
+        }
+
+
+        if (
+            !data.services ||
+            data.services.length === 0
+        ) {
+
+            services.innerHTML =
+                "<p>No services available.</p>";
+
+            return;
+        }
+
+
+        data.services.forEach(
+            function(service) {
+
+                services.innerHTML += `
+
+                    <div class="service-card">
+
+                        <i class="fa-solid fa-shirt"></i>
+
+                        <h3>
+                            ${service.name}
+                        </h3>
+
+                        <p>
+                            ${service.description || ""}
+                        </p>
+
+                        <strong>
+                            R${service.price}
+                        </strong>
+
+                        <p>
+                            ${service.duration || ""}
+                        </p>
+
+                    </div>
+
+                `;
+
+            }
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "SERVICES ERROR:",
+            error
+        );
+
+        services.innerHTML =
+            "<p>Unable to load services.</p>";
+    }
+}
+
+// ============================================================
+// REVIEWS
+// ============================================================
+
+let selectedRating = 0;
+
+
+// ============================================================
+// SELECT RATING
+// ============================================================
+
+document
+    .querySelectorAll("#ratingStars button")
+    .forEach(function(button) {
+
+        button.addEventListener(
+            "click",
+            function() {
+
+                selectedRating =
+                    parseInt(
+                        this.dataset.rating
+                    );
+
+
+                document
+                    .querySelectorAll(
+                        "#ratingStars button"
+                    )
+                    .forEach(function(star) {
+
+                        const starRating =
+                            parseInt(
+                                star.dataset.rating
+                            );
+
+
+                        if (
+                            starRating <=
+                            selectedRating
+                        ) {
+
+                            star.classList.add(
+                                "selected"
+                            );
+
+                        } else {
+
+                            star.classList.remove(
+                                "selected"
+                            );
+
+                        }
+
+                    });
+
+
+                document.getElementById(
+                    "selectedRating"
+                ).textContent =
+                    selectedRating +
+                    " / 5 stars";
+
+            }
+        );
+
+    });
+
+// ============================================================
+// DISPLAY AVERAGE RATING
+// ============================================================
+
+function displayAverageRating(averageRating) {
+
+    const ratingElement =
+        document.getElementById("rating");
+
+    const rating =
+        Number(averageRating || 0);
+
+    if (rating === 0) {
+
+        ratingElement.innerHTML =
+            `<span class="no-rating">No ratings yet</span>`;
+
+        return;
+    }
+
+
+    const fullStars =
+        Math.floor(rating);
+
+    const hasHalfStar =
+        rating - fullStars >= 0.5;
+
+    const emptyStars =
+        5 -
+        fullStars -
+        (hasHalfStar ? 1 : 0);
+
+
+    let stars = "";
+
+
+    // Full stars
+    for (let i = 0; i < fullStars; i++) {
+
+        stars +=
+            `<i class="fa-solid fa-star"></i>`;
+
+    }
+
+
+    // Half star
+    if (hasHalfStar) {
+
+        stars +=
+            `<i class="fa-solid fa-star-half-stroke"></i>`;
+
+    }
+
+
+    // Empty stars
+    for (let i = 0; i < emptyStars; i++) {
+
+        stars +=
+            `<i class="fa-regular fa-star"></i>`;
+
+    }
+
+
+    ratingElement.innerHTML =
+        `${stars} <strong>${rating.toFixed(1)}</strong>/5`;
+
+}
+
+// ============================================================
+// LOAD REVIEWS
+// ============================================================
+
+async function loadReviews(id) {
+
+    const reviewBox =
+        document.getElementById(
+            "reviews"
+        );
+
+
+    try {
+
+        const response =
+            await fetch(
+
+                `https://laundry-ktbs.onrender.com/reviews/${id}`
+
+            );
+
+
+        console.log(
+            "Reviews HTTP status:",
+            response.status
+        );
+
+
+        const data =
+            await response.json();
+
+
+        console.log(
+            "Reviews response:",
+            data
+        );
+
+
+        if (
+            !response.ok ||
+            !data.success
+        ) {
+
+            reviewBox.innerHTML =
+                "<p>Unable to load reviews.</p>";
+
+            return;
+
+        }
+
+
+        // ====================================================
+        // AVERAGE RATING
+        // ====================================================
+
+// ====================================================
+// AVERAGE RATING
+// ====================================================
+
+        const averageRating =
+            Number(data.average_rating || 0);
+
+        const reviewCount =
+            Number(data.review_count || 0);
+
+
+        // Bottom review section
+
+        document.getElementById(
+            "averageRating"
+        ).textContent =
+            "★ " +
+            averageRating.toFixed(1) +
+            " / 5";
+
+        document.getElementById(
+            "reviewCount"
+        ).textContent =
+            reviewCount +
+            (
+                reviewCount === 1
+                    ? " review"
+                    : " reviews"
+            );
+
+
+        // Top hero rating
+
+        displayAverageRating(
+            averageRating
+        );
+
+
+
+        // ====================================================
+        // NO REVIEWS
+        // ====================================================
+
+        if (
+            !data.reviews ||
+            data.reviews.length === 0
+        ) {
+
+            reviewBox.innerHTML = `
+                <p>
+                    No reviews yet.
+                    Be the first student to review this laundromat.
+                </p>
+            `;
+
+            return;
+
+        }
+
+
+        // ====================================================
+        // DISPLAY REVIEWS
+        // ====================================================
+
+        reviewBox.innerHTML = "";
+
+
+        data.reviews.forEach(function(review) {
+
+            const stars =
+                "★".repeat(Number(review.rating)) +
+                "☆".repeat(5 - Number(review.rating));
+
+
+            const isMyReview =
+                Number(review.user_id) === Number(user.id);
+
+
+            console.log("REVIEW OWNER CHECK:", {
+                review_id: review.id,
+                review_user_id: review.user_id,
+                logged_in_user_id: user.id,
+                isMyReview: isMyReview
+            });
+
+
+            reviewBox.innerHTML += `
+
+                <div class="review">
+
+                    <h4>
+                        ${review.student || "Student"}
+                    </h4>
+
+                    <div class="review-stars">
+                        ${stars}
+                    </div>
+
+                    <p>
+                        ${review.comment || ""}
+                    </p>
+
+                    <small>
+                        ${review.created_at || ""}
+                    </small>
+
+                    ${
+                        isMyReview
+                        ? `
+                            <button
+                                type="button"
+                                class="delete-review-btn"
+                                onclick="deleteReview(${review.id})">
+
+                                <i class="fa-solid fa-trash"></i>
+                                Delete Review
+
+                            </button>
+                        `
+                        : ""
+                    }
+
+                </div>
+
+            `;
+
+        });
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "REVIEWS ERROR:",
+            error
+        );
+
+
+        reviewBox.innerHTML =
+            "<p>Unable to load reviews.</p>";
+
+    }
+
+}
+
+// ============================================================
+// DELETE REVIEW
+// ============================================================
+
+async function deleteReview(reviewId) {
+
+    if (!user || !user.id) {
+
+        alert("Please login first.");
+
+        return;
+
+    }
+
+
+    const confirmed = confirm(
+        "Are you sure you want to delete your review?"
+    );
+
+
+    if (!confirmed) {
+
+        return;
+
+    }
+
+
+    try {
+
+        const response = await fetch(
+
+            `https://laundry-ktbs.onrender.com/reviews/${reviewId}`,
+
+            {
+
+                method: "DELETE",
+
+                headers: {
+
+                    "Content-Type":
+                        "application/json"
+
+                },
+
+                body: JSON.stringify({
+
+                    user_id:
+                        Number(user.id)
+
+                })
+
+            }
+
+        );
+
+
+        const data =
+            await response.json();
+
+
+        console.log(
+            "DELETE REVIEW RESPONSE:",
+            data
+        );
+
+
+        if (
+            response.ok &&
+            data.success
+        ) {
+
+            alert(
+                "Review deleted successfully."
+            );
+
+
+            // Reload reviews
+
+            await loadReviews(
+                laundromatId
+            );
+
+
+            // Check whether the student
+            // can review again
+
+            await checkReviewEligibility(
+                laundromatId
+            );
+
+
+            return;
+
+        }
+
+
+        alert(
+            data.message ||
+            "Unable to delete review."
+        );
+
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "DELETE REVIEW ERROR:",
+            error
+        );
+
+
+        alert(
+            "Unable to connect to the server."
+        );
+
+    }
+
+}
+
+// ============================================================
+// CHECK WHETHER STUDENT ALREADY REVIEWED
+// ============================================================
+async function checkReviewEligibility(
+    laundromatId
+) {
+
+    if (!user || !user.id) {
+
+        return;
+
+    }
+
+
+    try {
+
+        const response = await fetch(
+
+            `https://laundry-ktbs.onrender.com/reviews/can-review/${user.id}/${laundromatId}`
+
+        );
+
+
+        const data =
+            await response.json();
+
+
+        console.log(
+            "CAN REVIEW RESPONSE:",
+            data
+        );
+
+
+        if (!response.ok) {
+
+            console.error(
+                "Review eligibility error:",
+                data
+            );
+
+            return;
+
+        }
+
+
+        const form =
+            document.getElementById(
+                "reviewForm"
+            );
+
+
+        if (!form) {
+
+            return;
+
+        }
+
+
+        // ====================================================
+        // STUDENT CAN REVIEW
+        // ====================================================
+
+        if (data.can_review) {
+
+            form.style.display = "block";
+
+
+            // Store booking ID for submission
+
+            form.dataset.bookingId =
+                data.booking_id;
+
+            return;
+
+        }
+
+
+        // ====================================================
+        // STUDENT CANNOT REVIEW
+        // ====================================================
+
+        form.innerHTML = `
+
+            <h3>
+                Reviews
+            </h3>
+
+            <p>
+                ${data.message ||
+                "You cannot review this laundromat yet."}
+            </p>
+
+        `;
+
+    }
+
+
+    catch (error) {
+
+        console.error(
+            "CHECK REVIEW ELIGIBILITY ERROR:",
+            error
+        );
+
+    }
+
+}
+
+
+// ============================================================
+// SUBMIT REVIEW
+// ============================================================
+
+document
+    .getElementById("submitReviewBtn")
+    .addEventListener(
+        "click",
+        async function() {
+
+            // ================================================
+            // CHECK LOGIN
+            // ================================================
+
+            if (!user || !user.id) {
+
+                alert(
+                    "Please login first."
+                );
+
+                return;
+
+            }
+
+
+            // ================================================
+            // CHECK RATING
+            // ================================================
+
+            if (selectedRating === 0) {
+
+                alert(
+                    "Please select a rating."
+                );
+
+                return;
+
+            }
+
+
+            // ================================================
+            // GET REVIEW FORM
+            // ================================================
+
+            const reviewForm =
+                document.getElementById(
+                    "reviewForm"
+                );
+
+
+            // ================================================
+            // GET BOOKING ID
+            // ================================================
+
+            const bookingId =
+                Number(
+                    reviewForm.dataset.bookingId
+                );
+
+
+            if (!bookingId) {
+
+                alert(
+                    "You do not have an eligible completed booking."
+                );
+
+                return;
+
+            }
+
+
+            // ================================================
+            // GET COMMENT
+            // ================================================
+
+            const comment =
+                document
+                    .getElementById(
+                        "reviewComment"
+                    )
+                    .value
+                    .trim();
+
+
+            // ================================================
+            // SEND REVIEW
+            // ================================================
+
+            try {
+
+                const response =
+                    await fetch(
+
+                        "https://laundry-ktbs.onrender.com/reviews",
+
+                        {
+
+                            method: "POST",
+
+                            headers: {
+
+                                "Content-Type":
+                                    "application/json"
+
+                            },
+
+                            body:
+                                JSON.stringify({
+
+                                    user_id:
+                                        Number(
+                                            user.id
+                                        ),
+
+                                    laundromat_id:
+                                        Number(
+                                            laundromatId
+                                        ),
+
+                                    booking_id:
+                                        bookingId,
+
+                                    rating:
+                                        selectedRating,
+
+                                    comment:
+                                        comment
+
+                                })
+
+                        }
+
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                console.log(
+                    "SUBMIT REVIEW RESPONSE:",
+                    data
+                );
+
+
+                // ============================================
+                // SUCCESS
+                // ============================================
+
+                if (
+                    response.ok &&
+                    data.success
+                ) {
+
+                    alert(
+                        "Review submitted successfully!"
+                    );
+
+
+                    // Reload reviews
+
+                    await loadReviews(
+                        laundromatId
+                    );
+
+
+                    // Replace form
+
+                    reviewForm.innerHTML = `
+
+                        <h3>
+                            Thank you for your review! ⭐
+                        </h3>
+
+                        <p>
+                            Your review has been submitted successfully.
+                        </p>
+
+                    `;
+
+
+                    return;
+
+                }
+
+
+                // ============================================
+                // ERROR
+                // ============================================
+
+                alert(
+                    data.message ||
+                    "Unable to submit review."
+                );
+
+            }
+
+
+            catch (error) {
+
+                console.error(
+                    "SUBMIT REVIEW ERROR:",
+                    error
+                );
+
+
+                alert(
+                    "Unable to connect to the server."
+                );
+
+            }
+
+        }
+    );
+loadLaundromat();
+
+checkReviewEligibility(
+    laundromatId
+);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>My Orders | Campus Laundry Connect</title>
+
+<link rel="stylesheet" href="my-orders.css">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+</head>
+
+<body>
+
+<div class="container">
+
+<!-- Sidebar -->
+
+<aside class="sidebar">
+
+<h2>🧺 LaundryConnect</h2>
+
+<ul>
+
+<li>
+<a href="dashboard.html">
+<i class="fa-solid fa-house"></i>
+Dashboard
+</a>
+</li>
+
+<li>
+<a href="laundromats.html">
+<i class="fa-solid fa-store"></i>
+Laundromats
+</a>
+</li>
+
+<li>
+<a href="book-laundry.html">
+<i class="fa-solid fa-calendar-check"></i>
+Book Laundry
+</a>
+</li>
+
+<li class="active">
+<a href="#">
+<i class="fa-solid fa-box"></i>
+My Orders
+</a>
+</li>
+
+<li>
+<a href="track-order.html">
+<i class="fa-solid fa-location-dot"></i>
+Track Order
+</a>
+</li>
+
+<li>
+<a href="profile.html">
+<i class="fa-solid fa-user"></i>
+Profile
+</a>
+</li>
+
+<li>
+<a href="#" id="logoutBtn">
+<i class="fa-solid fa-right-from-bracket"></i>
+Logout
+</a>
+</li>
+
+</ul>
+
+</aside>
+
+<!-- Main -->
+
+<main class="main-content">
+
+<h1>My Laundry Orders</h1>
+
+<p class="subtitle">
+
+View all your bookings.
+
+</p>
+
+<!-- Summary -->
+
+<div class="summary">
+
+<div class="card">
+
+<i class="fa-solid fa-box"></i>
+
+<h2 id="totalOrders">0</h2>
+
+<p>Total Orders</p>
+
+</div>
+
+<div class="card">
+
+<i class="fa-solid fa-spinner"></i>
+
+<h2 id="processingOrders">0</h2>
+
+<p>Processing</p>
+
+</div>
+
+<div class="card">
+
+<i class="fa-solid fa-circle-check"></i>
+
+<h2 id="completedOrders">0</h2>
+
+<p>Completed</p>
+
+</div>
+
+<div class="card">
+
+<i class="fa-solid fa-clock"></i>
+
+<h2 id="pendingOrders">0</h2>
+
+<p>Pending</p>
+
+</div>
+
+</div>
+
+<!-- Orders -->
+
+<div class="table-container">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Booking ID</th>
+
+<th>Laundromat</th>
+
+<th>Service</th>
+
+<th>Pickup Date</th>
+
+<th>Status</th>
+
+<th>Total</th>
+
+<th>Action</th>
+
+</tr>
+
+</thead>
+
+<tbody id="ordersTable">
+
+<!-- Orders loaded here -->
+
+</tbody>
+
+</table>
+
+</div>
+
+</main>
+
+</div>
+
+<script>
+
+const API_URL = "http://127.0.0.1:5000";
+
+const user = JSON.parse(
+    localStorage.getItem("loggedInUser")
+);
+
+
+// ===============================
+// CHECK LOGIN
+// ===============================
+
+if (!user || user.role !== "student") {
+
+    alert("Please login first.");
+
+    window.location.href = "../login.html";
+
+}
+
+
+// ===============================
+// LOGOUT
+// ===============================
+
+document
+.getElementById("logoutBtn")
+.addEventListener("click", function(e) {
+
+    e.preventDefault();
+
+    localStorage.removeItem("loggedInUser");
+
+    window.location.href = "../login.html";
+
+});
+
+
+// ===============================
+// LOAD ORDERS
+// ===============================
+
+async function loadOrders() {
+
+    try {
+
+        console.log("Logged in student:", user);
+
+        const response = await fetch(
+            API_URL + "/orders"
+        );
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Server returned HTTP " +
+                response.status
+            );
+
+        }
+
+        const result = await response.json();
+
+        console.log("Orders received:", result);
+
+
+        /*
+         IMPORTANT:
+
+         Flask returns:
+
+         {
+             success: true,
+             orders: [...]
+         }
+        */
+
+        if (!result.success) {
+
+            throw new Error(
+                result.message ||
+                "Unable to load orders"
+            );
+
+        }
+
+
+        const orders = result.orders || [];
+
+
+        // ===============================
+        // FILTER THIS STUDENT'S ORDERS
+        // ===============================
+
+        const studentName =
+            (
+                user.first_name ||
+                user.firstName ||
+                ""
+            ) +
+            " " +
+            (
+                user.last_name ||
+                user.lastName ||
+                ""
+            );
+
+        const email =
+            user.email || "";
+
+
+        const myOrders = orders.filter(order => {
+
+            return (
+
+                order.student_email === email ||
+
+                order.studentEmail === email ||
+
+                order.student_name ===
+                    studentName.trim()
+
+            );
+
+        });
+
+
+        console.log(
+            "My orders:",
+            myOrders
+        );
+
+
+        displayOrders(myOrders);
+
+    }
+
+    catch(error) {
+
+        console.error(
+            "LOAD ORDERS ERROR:",
+            error
+        );
+
+        document.getElementById("ordersTable").innerHTML = `
+
+            <tr>
+
+                <td colspan="7"
+                    style="text-align:center;color:red;">
+
+                    Unable to load orders.
+
+                </td>
+
+            </tr>
+
+        `;
+
+    }
+
+}
+
+
+// ===============================
+// DISPLAY ORDERS
+// ===============================
+
+function displayOrders(myOrders) {
+
+    const table =
+        document.getElementById("ordersTable");
+
+
+    // ===============================
+    // STATISTICS
+    // ===============================
+
+    document.getElementById("totalOrders")
+        .textContent =
+        myOrders.length;
+
+
+    document.getElementById("processingOrders")
+        .textContent =
+        myOrders.filter(order =>
+
+            order.status === "Confirmed" ||
+
+            order.status === "Processing" ||
+
+            order.status === "Washing" ||
+
+            order.status === "Drying"
+
+        ).length;
+
+
+    document.getElementById("completedOrders")
+        .textContent =
+        myOrders.filter(order =>
+            order.status === "Completed"
+        ).length;
+
+
+    document.getElementById("pendingOrders")
+        .textContent =
+        myOrders.filter(order =>
+            order.status === "Pending"
+        ).length;
+
+
+    // ===============================
+    // NO ORDERS
+    // ===============================
+
+    if (myOrders.length === 0) {
+
+        table.innerHTML = `
+
+            <tr>
+
+                <td colspan="7"
+                    style="text-align:center;padding:30px;">
+
+                    No laundry bookings found.
+
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+
+    }
+
+
+    // ===============================
+    // DISPLAY ORDERS
+    // ===============================
+
+    table.innerHTML = "";
+
+
+    myOrders.forEach(order => {
+
+        let action = "";
+
+
+        if (order.status === "Pending") {
+
+            action = `
+                <button
+                    class="btn cancel"
+                    onclick="cancelBooking(${order.id})">
+
+                    Cancel
+
+                </button>
+            `;
+
+        }
+
+
+        else if (
+            order.status === "Confirmed" ||
+            order.status === "Processing" ||
+            order.status === "Washing" ||
+            order.status === "Drying" ||
+            order.status === "Ready for Pickup"
+        ) {
+
+            action = `
+                <a
+                    href="track-order.html?id=${order.id}"
+                    class="btn track">
+
+                    Track
+
+                </a>
+            `;
+
+        }
+
+
+        else if (order.status === "Completed") {
+
+            action = `
+                <span class="completed-label">
+                    Completed
+                </span>
+            `;
+
+        }
+
+
+        else if (order.status === "Cancelled") {
+
+            action = `
+                <span class="cancelled-label">
+                    Cancelled
+                </span>
+            `;
+
+        }
+
+        let statusClass =
+            (order.status || "")
+            .toLowerCase()
+            .replace(/\s+/g, "-");
+
+
+        table.innerHTML += `
+
+            <tr>
+
+                <td>
+                    ${order.booking_number || order.id}
+                </td>
+
+
+                <td>
+                    ${order.business_name || "N/A"}
+                </td>
+
+
+                <td>
+                    ${order.service || "N/A"}
+                </td>
+
+
+                <td>
+                    ${order.pickup_date || "N/A"}
+                </td>
+
+
+                <td>
+
+                    <span class="
+                        status
+                        ${statusClass}
+                    ">
+
+                        ${order.status || "Pending"}
+
+                    </span>
+
+                </td>
+
+
+                <td>
+
+                    R${Number(
+                        order.amount ||
+                        order.total_price ||
+                        0
+                    ).toFixed(2)}
+
+                </td>
+
+
+                <td>
+
+                    ${action}
+
+                </td>
+
+            </tr>
+
+        `;
+
+    });
+
+}
+
+
+// ===============================
+// CANCEL BOOKING
+// ===============================
+
+async function cancelBooking(id) {
+
+    const confirmCancel = confirm(
+        "Are you sure you want to cancel this booking?"
+    );
+
+    if (!confirmCancel) {
+        return;
+    }
+
+    try {
+
+        const response = await fetch(
+            `http://127.0.0.1:5000/orders/${id}/cancel`,
+            {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            }
+        );
+
+        const result = await response.json();
+
+        if (result.success) {
+
+            alert("Booking canceled successfully.");
+
+            location.reload();
+
+        } else {
+
+            alert(result.message || "Unable to cancel booking.");
+
+        }
+
+    } catch (error) {
+
+        console.error("Cancel booking error:", error);
+
+        alert("Unable to connect to server.");
+
+    }
+}
+// ===============================
+// START
+// ===============================
+
+loadOrders();
+
+</script>
+</body>
+</html>

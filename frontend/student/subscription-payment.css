@@ -1,0 +1,329 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+
+body {
+    min-height: 100vh;
+    background: #eef4fb;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    padding: 30px;
+}
+
+
+/* =========================================
+   PAGE
+========================================= */
+
+.payment-page {
+    width: 100%;
+    max-width: 500px;
+}
+
+
+/* =========================================
+   CARD
+========================================= */
+
+.payment-card {
+
+    background: white;
+
+    padding: 40px;
+
+    border-radius: 20px;
+
+    box-shadow:
+        0 10px 35px rgba(0, 0, 0, 0.10);
+
+    text-align: center;
+}
+
+
+/* =========================================
+   ICON
+========================================= */
+
+.payment-icon {
+
+    width: 70px;
+    height: 70px;
+
+    margin: 0 auto 20px;
+
+    background: #3b82f6;
+
+    color: white;
+
+    border-radius: 50%;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 28px;
+}
+
+
+.payment-card h1 {
+
+    color: #1f2937;
+
+    margin-bottom: 10px;
+
+}
+
+
+.subtitle {
+
+    color: #64748b;
+
+    margin-bottom: 30px;
+
+}
+
+
+/* =========================================
+   SUMMARY
+========================================= */
+
+.summary {
+
+    background: #f8fafc;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 12px;
+
+    padding: 20px;
+
+    margin-bottom: 25px;
+
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 20px;
+
+}
+
+
+.summary div {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 7px;
+
+}
+
+
+.summary span {
+
+    font-size: 13px;
+
+    color: #64748b;
+
+}
+
+
+.summary strong {
+
+    color: #2563eb;
+
+    font-size: 20px;
+
+}
+
+
+/* =========================================
+   FORM
+========================================= */
+
+form {
+
+    text-align: left;
+
+}
+
+
+label {
+
+    display: block;
+
+    margin-bottom: 8px;
+
+    font-weight: bold;
+
+    color: #374151;
+
+}
+
+
+select {
+
+    width: 100%;
+
+    padding: 14px;
+
+    border: 1px solid #cbd5e1;
+
+    border-radius: 8px;
+
+    background: white;
+
+    font-size: 15px;
+
+    outline: none;
+
+}
+
+
+select:focus {
+
+    border-color: #3b82f6;
+
+    box-shadow:
+        0 0 0 3px rgba(59,130,246,.12);
+
+}
+
+
+/* =========================================
+   PAY BUTTON
+========================================= */
+
+.pay-btn {
+
+    width: 100%;
+
+    margin-top: 20px;
+
+    padding: 15px;
+
+    border: none;
+
+    border-radius: 9px;
+
+    background: #3b82f6;
+
+    color: white;
+
+    font-size: 16px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition: .2s;
+
+}
+
+
+.pay-btn:hover {
+
+    background: #2563eb;
+
+    transform: translateY(-1px);
+
+}
+
+
+.pay-btn:disabled {
+
+    opacity: .7;
+
+    cursor: not-allowed;
+
+    transform: none;
+
+}
+
+
+/* =========================================
+   SECURITY
+========================================= */
+
+.secure {
+
+    margin-top: 20px;
+
+    color: #64748b;
+
+    font-size: 13px;
+
+}
+
+
+.secure i {
+
+    color: #22c55e;
+
+    margin-right: 5px;
+
+}
+
+
+/* =========================================
+   BACK BUTTON
+========================================= */
+
+.back-btn {
+
+    margin-top: 20px;
+
+    border: none;
+
+    background: transparent;
+
+    color: #3b82f6;
+
+    cursor: pointer;
+
+    font-size: 14px;
+
+}
+
+
+.back-btn:hover {
+
+    text-decoration: underline;
+
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 600px) {
+
+    body {
+
+        padding: 15px;
+
+    }
+
+    .payment-card {
+
+        padding: 25px 20px;
+
+    }
+
+    .summary {
+
+        grid-template-columns: 1fr;
+
+    }
+
+}

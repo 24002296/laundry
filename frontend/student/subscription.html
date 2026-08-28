@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>LaundryConnect Subscription</title>
+
+    <link rel="stylesheet" href="subscription.css">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+</head>
+
+<body>
+
+<div class="subscription-page">
+
+    <div class="subscription-header">
+
+        <div class="logo">
+            🧺 LaundryConnect
+        </div>
+
+        <button onclick="logout()" class="logout-btn">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            Logout
+        </button>
+
+    </div>
+
+
+    <section class="welcome">
+
+        <span class="badge">
+            <i class="fa-solid fa-shield-halved"></i>
+            Account Setup
+        </span>
+
+        <h1>
+            Choose Your LaundryConnect Plan
+        </h1>
+
+        <p>
+            Subscribe to continue using LaundryConnect.
+        </p>
+
+    </section>
+
+
+    <div class="plans">
+
+
+        <!-- BASIC -->
+
+        <div class="plan">
+
+            <div class="plan-icon">
+                <i class="fa-solid fa-seedling"></i>
+            </div>
+
+            <h2>Basic</h2>
+
+            <div class="price">
+                R29
+                <span>/month</span>
+            </div>
+
+            <ul>
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Access LaundryConnect
+                </li>
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Book laundromats
+                </li>
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Track bookings
+                </li>
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Booking notifications
+                </li>
+
+            </ul>
+
+            <button
+                class="plan-btn"
+                onclick="subscribe('Basic',29)">
+
+                Subscribe
+
+            </button>
+
+        </div>
+
+
+        <!-- STANDARD -->
+
+        <div class="plan featured">
+
+            <div class="popular">
+                MOST POPULAR
+            </div>
+
+            <div class="plan-icon">
+                <i class="fa-solid fa-star"></i>
+            </div>
+
+            <h2>Standard</h2>
+
+            <div class="price">
+                R49
+                <span>/month</span>
+            </div>
+
+            <ul>
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Everything in Basic
+                </li>
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Priority booking
+                </li>
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Booking history
+                </li>
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Email notifications
+                </li>
+
+            </ul>
+
+            <button
+                class="plan-btn"
+                onclick="subscribe('Standard',49)">
+
+                Subscribe
+
+            </button>
+
+        </div>
+
+
+        <!-- PREMIUM -->
+
+        <div class="plan">
+
+            <div class="plan-icon">
+                <i class="fa-solid fa-crown"></i>
+            </div>
+
+            <h2>Premium</h2>
+
+            <div class="price">
+                R79
+                <span>/month</span>
+            </div>
+
+            <ul>
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Everything in Standard
+                </li>
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Priority support
+                </li>
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Special offers
+                </li>
+
+                <li>
+                    <i class="fa-solid fa-check"></i>
+                    Advanced notifications
+                </li>
+
+            </ul>
+
+            <button
+                class="plan-btn"
+                onclick="subscribe('Premium',79)">
+
+                Subscribe
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+const API = "http://127.0.0.1:5000";
+
+const user =
+    JSON.parse(
+        localStorage.getItem("loggedInUser")
+    );
+
+
+if(!user){
+
+    window.location.href =
+        "../login.html";
+
+}
+
+
+async function subscribe(plan, amount){
+
+    if(!user){
+
+        alert("Please login first.");
+
+        return;
+
+    }
+
+
+    localStorage.setItem(
+        "selectedPlan",
+        plan
+    );
+
+
+    localStorage.setItem(
+        "subscriptionAmount",
+        amount
+    );
+
+
+    window.location.href =
+        "subscription-payment.html";
+
+}
+
+
+function logout(){
+
+    localStorage.removeItem(
+        "loggedInUser"
+    );
+
+    window.location.href =
+        "../login.html";
+
+}
+
+</script>
+
+</body>
+
+</html>

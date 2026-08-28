@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track Order | Campus Laundry Connect</title>
+
+    <link rel="stylesheet" href="track-order.css">
+
+    <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+<body>
+
+<div class="container">
+
+    <!-- Sidebar -->
+
+    <aside class="sidebar">
+
+        <h2>🧺 LaundryConnect</h2>
+
+        <ul>
+
+            <li><a href="dashboard.html"><i class="fa-solid fa-house"></i> Dashboard</a></li>
+
+            <li><a href="laundromats.html"><i class="fa-solid fa-store"></i> Laundromats</a></li>
+
+            <li><a href="book-laundry.html"><i class="fa-solid fa-calendar-check"></i> Book Laundry</a></li>
+
+            <li><a href="my-orders.html"><i class="fa-solid fa-box"></i> My Orders</a></li>
+
+            <li class="active"><a href="#"><i class="fa-solid fa-location-dot"></i> Track Order</a></li>
+
+            <li><a href="profile.html"><i class="fa-solid fa-user"></i> Profile</a></li>
+
+            <li>
+                <a href="#" id="logoutBtn">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    Logout
+                </a>
+            </li>
+
+        </ul>
+
+    </aside>
+
+    <!-- Main -->
+
+    <main class="main-content">
+
+        <h1>Track Laundry Order</h1>
+
+        <!-- Order Information -->
+
+        <div class="order-card">
+
+            <div class="order-info">
+
+                <div>
+
+                    <h3>Order ID</h3>
+
+                    <p id="orderId">-</p>
+
+                </div>
+
+                <div>
+
+                    <h3>Laundromat</h3>
+
+                    <p id="laundromatName">-</p>
+
+                </div>
+
+                <div>
+
+                    <h3>Service</h3>
+
+                    <p id="serviceName">-</p>
+
+                </div>
+
+                <div>
+
+                    <h3>Pickup Date</h3>
+
+                    <p id="pickupDate">-</p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Timeline -->
+
+        <h2>Order Progress</h2>
+
+        <div class="progress-step">
+
+            <div class="step" id="step1">
+
+                <div class="circle">
+
+                    <i class="fa-solid fa-check"></i>
+
+                </div>
+
+                <h3>Booking Confirmed</h3>
+
+            </div>
+
+            <div class="line" id="line1"></div>
+
+            <div class="step" id="step2">
+
+                <div class="circle">
+
+                    <i class="fa-solid fa-shirt"></i>
+
+                </div>
+
+                <h3>Laundry Received</h3>
+
+            </div>
+
+            <div class="line" id="line2"></div>
+
+            <div class="step" id="step3">
+
+                <div class="circle">
+
+                    <i class="fa-solid fa-water"></i>
+
+                </div>
+
+                <h3>Washing</h3>
+
+            </div>
+
+            <div class="line" id="line3"></div>
+
+            <div class="step" id="step4">
+
+                <div class="circle">
+
+                    <i class="fa-solid fa-wind"></i>
+
+                </div>
+
+                <h3>Drying</h3>
+
+            </div>
+
+            <div class="line" id="line4"></div>
+
+            <div class="step" id="step5">
+
+                <div class="circle">
+
+                    <i class="fa-solid fa-box-open"></i>
+
+                </div>
+
+                <h3>Ready for Pickup</h3>
+
+            </div>
+
+        </div>
+
+        <!-- Current Status -->
+
+        <div class="status-box">
+
+            <h2>Current Status</h2>
+
+            <h3 id="statusMessage">
+                Waiting...
+            </h3>
+
+            <p>
+
+                Status:
+
+                <strong id="currentStatus">
+
+                    Pending
+
+                </strong>
+
+            </p>
+
+        </div>
+
+        <!-- Contact -->
+
+        <div class="contact">
+
+            <h2>Need Help?</h2>
+
+            <p>
+
+                <i class="fa-solid fa-phone"></i>
+
+                <span id="laundromatPhone">Not Available</span>
+
+            </p>
+
+            <p>
+
+                <i class="fa-solid fa-envelope"></i>
+
+                <span id="laundromatEmail">Not Available</span>
+
+            </p>
+
+            <button>
+
+                Contact Laundromat
+
+            </button>
+
+        </div>
+
+    </main>
+
+</div>
+<script>
+
+const API_URL = "http://127.0.0.1:5000";
+
+const user = JSON.parse(
+    localStorage.getItem("loggedInUser")
+);
+
+
+// ==========================================
+// LOGIN CHECK
+// ==========================================
+
+if (!user || user.role !== "student") {
+
+    alert("Please login first.");
+
+    window.location.href = "../login.html";
+
+}
+
+
+// ==========================================
+// LOAD TRACKING
+// ==========================================
+
+window.onload = function () {
+
+    loadTracking();
+
+};
+
+const params = new URLSearchParams(
+    window.location.search
+);
+
+const bookingId = params.get("id");
+// ==========================================
+// LOAD STUDENT ORDER
+// ==========================================
+
+async function loadTracking() {
+
+    try {
+
+        console.log("Logged in user:", user);
+
+
+        const response = await fetch(
+            API_URL + "/orders/student/" + user.id
+        );
+
+
+        console.log(
+            "Orders status:",
+            response.status
+        );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Unable to load orders. HTTP " +
+                response.status
+            );
+
+        }
+
+
+        const result = await response.json();
+
+
+        console.log(
+            "Orders response:",
+            result
+        );
+
+
+        if (
+            !result.success ||
+            !result.orders
+        ) {
+
+            alert("Unable to load bookings.");
+
+            window.location.href =
+                "book-laundry.html";
+
+            return;
+
+        }
+
+
+        // ==========================================
+        // ONLY ACTIVE ORDERS
+        // ==========================================
+
+        const activeOrders =
+            result.orders.filter(order => {
+
+                return [
+                    "Pending",
+                    "Confirmed",
+                    "Processing",
+                    "Washing",
+                    "Drying",
+                    "Ready for Pickup"
+                ].includes(order.status);
+
+            });
+
+
+        console.log(
+            "Active orders:",
+            activeOrders
+        );
+
+
+        // ==========================================
+        // NO ACTIVE ORDER
+        // ==========================================
+
+        if (activeOrders.length === 0) {
+
+            alert(
+                "You do not have an active laundry booking."
+            );
+
+            window.location.href =
+                "my-orders.html";
+
+            return;
+
+        }
+
+
+        // ==========================================
+        // GET LATEST ACTIVE ORDER
+        // ==========================================
+
+        const order =
+            activeOrders[0];
+
+
+        console.log(
+            "Tracking order:",
+            order
+        );
+
+
+        // ==========================================
+        // DISPLAY ORDER
+        // ==========================================
+
+        document.getElementById(
+            "orderId"
+        ).textContent =
+            order.booking_number || "-";
+
+
+        document.getElementById(
+            "laundromatName"
+        ).textContent =
+            order.business_name || "Unknown";
+
+
+        document.getElementById(
+            "serviceName"
+        ).textContent =
+            order.service || "-";
+
+
+        document.getElementById(
+            "pickupDate"
+        ).textContent =
+            formatDate(order.pickup_date) +
+            " " +
+            formatTime(order.pickup_time);
+
+
+        document.getElementById(
+            "currentStatus"
+        ).textContent =
+            order.status || "Pending";
+
+
+        // ==========================================
+        // UPDATE TIMELINE
+        // ==========================================
+
+        updateTimeline(
+            order.status
+        );
+
+
+        // ==========================================
+        // LOAD LAUNDROMAT
+        // ==========================================
+
+        await loadLaundromat(
+            order.laundromat_id
+        );
+
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Tracking Error:",
+            error
+        );
+
+        alert(
+            "Unable to load tracking information."
+        );
+
+    }
+
+}
+
+function updateOrderProgress(status) {
+
+    console.log("Updating progress with status:", status);
+
+    // Get all progress steps
+    const steps = document.querySelectorAll(".progress-step");
+
+    // Remove previous classes
+    steps.forEach(step => {
+        step.classList.remove("active");
+        step.classList.remove("completed");
+    });
+
+    // Convert status to the correct step number
+    let currentStep = 0;
+
+    switch (status) {
+
+        case "Pending":
+            currentStep = 0;
+            break;
+
+        case "Confirmed":
+            currentStep = 1;
+            break;
+
+        case "Processing":
+            currentStep = 2;
+            break;
+
+        case "Washing":
+            currentStep = 3;
+            break;
+
+        case "Drying":
+            currentStep = 4;
+            break;
+
+        case "Ready for Pickup":
+            currentStep = 5;
+            break;
+
+        case "Completed":
+            currentStep = 5;
+            break;
+
+        default:
+            currentStep = 0;
+    }
+
+    console.log("Current progress step:", currentStep);
+
+    steps.forEach((step, index) => {
+
+        const stepNumber = index + 1;
+
+        if (stepNumber < currentStep) {
+
+            step.classList.add("completed");
+
+        }
+        else if (stepNumber === currentStep) {
+
+            step.classList.add("active");
+
+        }
+
+    });
+}
+// ==========================================
+// FORMAT DATE
+// ==========================================
+
+function formatDate(dateValue) {
+
+    if (!dateValue)
+        return "-";
+
+
+    const date =
+        new Date(dateValue);
+
+
+    if (isNaN(date.getTime()))
+        return dateValue;
+
+
+    return date.toLocaleDateString(
+        "en-ZA",
+        {
+            weekday: "short",
+            day: "2-digit",
+            month: "short",
+            year: "numeric"
+        }
+    );
+
+}
+
+
+// ==========================================
+// FORMAT TIME
+// ==========================================
+
+function formatTime(timeValue) {
+
+    if (!timeValue)
+        return "";
+
+
+    // Handles 19:02:00
+
+    if (
+        typeof timeValue === "string" &&
+        timeValue.length >= 5
+    ) {
+
+        return timeValue.substring(
+            0,
+            5
+        );
+
+    }
+
+
+    return timeValue;
+
+}
+
+
+// ==========================================
+// ORDER PROGRESS
+// ==========================================
+
+function updateTimeline(status) {
+
+    console.log("Updating timeline:", status);
+
+    // These IDs match the HTML
+    const steps = [
+        document.getElementById("step1"),
+        document.getElementById("step2"),
+        document.getElementById("step3"),
+        document.getElementById("step4"),
+        document.getElementById("step5")
+    ];
+
+    const lines = [
+        document.getElementById("line1"),
+        document.getElementById("line2"),
+        document.getElementById("line3"),
+        document.getElementById("line4")
+    ];
+
+    // Remove old classes
+    steps.forEach(step => {
+        if (step) {
+            step.classList.remove("active", "completed");
+        }
+    });
+
+    lines.forEach(line => {
+        if (line) {
+            line.classList.remove("active", "completed");
+        }
+    });
+
+    /*
+        Progress:
+
+        Pending       = nothing completed
+        Confirmed     = Step 1 active
+        Processing    = Step 1 completed, Step 2 active
+        Washing       = Steps 1-2 completed, Step 3 active
+        Drying        = Steps 1-3 completed, Step 4 active
+        Ready         = Steps 1-4 completed, Step 5 active
+        Completed     = all completed
+    */
+
+    let currentStep = 0;
+
+    switch (status) {
+
+        case "Pending":
+            currentStep = 0;
+            break;
+
+        case "Confirmed":
+            currentStep = 1;
+            break;
+
+        case "Processing":
+            currentStep = 2;
+            break;
+
+        case "Washing":
+            currentStep = 3;
+            break;
+
+        case "Drying":
+            currentStep = 4;
+            break;
+
+        case "Ready for Pickup":
+            currentStep = 5;
+            break;
+
+        case "Completed":
+            currentStep = 5;
+            break;
+
+        default:
+            currentStep = 0;
+    }
+
+    console.log("Current step:", currentStep);
+
+    // Apply completed/active classes
+    steps.forEach((step, index) => {
+
+        if (!step) return;
+
+        const stepNumber = index + 1;
+
+        if (stepNumber < currentStep) {
+
+            step.classList.add("completed");
+
+        }
+        else if (stepNumber === currentStep) {
+
+            // Current step = blue/glowing
+            step.classList.add("active");
+
+        }
+
+    });
+
+    // Update connecting lines
+    lines.forEach((line, index) => {
+
+        if (!line) return;
+
+        const lineNumber = index + 1;
+
+        if (lineNumber < currentStep) {
+
+            line.classList.add("completed");
+
+        }
+        else if (lineNumber === currentStep) {
+
+            line.classList.add("active");
+
+        }
+
+    });
+
+    // Update current status message
+    const statusMessage =
+        document.getElementById("statusMessage");
+
+    if (statusMessage) {
+
+        statusMessage.textContent =
+            getStatusMessage(status);
+
+    }
+}
+// ==========================================
+// STATUS MESSAGE
+// ==========================================
+
+function getStatusMessage(status) {
+
+    switch (status) {
+
+        case "Pending":
+
+            return "Your booking is waiting for confirmation.";
+
+        case "Confirmed":
+
+            return "Your booking has been confirmed.";
+
+        case "Processing":
+
+            return "Your laundry has been received and is being processed.";
+
+        case "Washing":
+
+            return "Your laundry is currently being washed.";
+
+        case "Drying":
+
+            return "Your laundry is currently being dried.";
+
+        case "Completed":
+
+        case "Ready for Pickup":
+
+            return "Your laundry is ready for pickup.";
+
+        default:
+
+            return "Waiting for status update.";
+
+    }
+
+}
+
+
+// ==========================================
+// LOAD LAUNDROMAT DETAILS
+// ==========================================
+
+async function loadLaundromat(laundromatId) {
+
+    if (!laundromatId) {
+
+        console.log(
+            "No laundromat ID available."
+        );
+
+        return;
+
+    }
+
+
+    try {
+
+        console.log(
+            "Loading laundromat:",
+            laundromatId
+        );
+
+
+        const response = await fetch(
+
+            API_URL +
+            "/laundromats/" +
+            laundromatId
+
+        );
+
+
+        console.log(
+            "Laundromat response:",
+            response.status
+        );
+
+
+        if (!response.ok) {
+
+            console.error(
+                "Laundromat endpoint returned:",
+                response.status
+            );
+
+            return;
+
+        }
+
+
+        const result =
+            await response.json();
+
+
+        console.log(
+            "Laundromat details:",
+            result
+        );
+
+
+        const shop =
+            result.laundromat ||
+            result;
+
+
+        if (!shop)
+            return;
+
+
+        // ======================================
+        // BUSINESS NAME
+        // ======================================
+
+        setText(
+            "helpBusinessName",
+            shop.business_name
+        );
+
+
+        // ======================================
+        // PHONE
+        // ======================================
+
+        setText(
+            "laundromatPhone",
+            shop.phone || "Not available"
+        );
+
+
+        // ======================================
+        // EMAIL
+        // ======================================
+
+        setText(
+            "laundromatEmail",
+            shop.email || "Not available"
+        );
+
+
+        // ======================================
+        // ADDRESS
+        // ======================================
+
+        setText(
+            "helpAddress",
+            shop.business_address ||
+            shop.address ||
+            "Not available"
+        );
+
+
+        // ======================================
+        // OPENING HOURS
+        // ======================================
+
+        if (
+            shop.opening_time &&
+            shop.closing_time
+        ) {
+
+            setText(
+                "helpHours",
+                formatTime(shop.opening_time) +
+                " - " +
+                formatTime(shop.closing_time)
+            );
+
+        }
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Laundromat Error:",
+            error
+        );
+
+    }
+
+}
+
+
+// ==========================================
+// SAFE TEXT UPDATE
+// ==========================================
+
+function setText(id, value) {
+
+    const element =
+        document.getElementById(id);
+
+
+    if (element) {
+
+        element.textContent =
+            value || "Not available";
+
+    }
+
+}
+
+
+// ==========================================
+// LOGOUT
+// ==========================================
+
+document
+.getElementById("logoutBtn")
+.addEventListener(
+    "click",
+    function(e) {
+
+        e.preventDefault();
+
+        localStorage.removeItem(
+            "loggedInUser"
+        );
+
+        window.location.href =
+            "../login.html";
+
+    }
+);
+
+</script>
+
+</body>
+</html>
